@@ -1,9 +1,9 @@
 <template>
-    <div class="container-fluid mb-5" >
+    <div class="container-fluid mb-5" >       
         <table v-if="pages.length > 0" class="table">
             <thead>
                 <tr>
-                    <th scope="col" v-for="header in headers" :key="header">{{ header }}</th>          
+                    <th scope="col" v-for="header in data.headers" :key="header">{{ header }}</th>          
                 </tr>
             </thead>
             <thead></thead>
@@ -27,10 +27,7 @@
                 <button type="button" @click="next" class="btn btn-light pager-btn">Next</button>
             </div>      
         </div>
-    
-
-    </div>
-    
+    </div>    
 </template>
 <script>
     import { ref, computed, watchEffect, onMounted, onUpdated } from 'vue'
@@ -38,8 +35,7 @@
 
     export default{
         props: {
-            rows: Array,
-            headers: Array
+            data: Array
         },
 
         setup(props){
@@ -58,16 +54,16 @@
             })
            
 
-            console.log("Prop rows: ",props.rows);
+            console.log("Prop rows: ",props.data.rows);
             const pages = computed(() => {
                 let page_s = [];
                 let idx = 0;
               
-                for(let i = 0;i < props.rows.length;i += pageSize.value){
+                for(let i = 0;i < props.data.rows.length;i += pageSize.value){
                     let sl = pageSize.value;
-                    if((props.rows.length - i) < 10)
-                        sl = props.rows.length - i
-                    page_s[idx] = props.rows.slice(i,i+sl);
+                    if((props.data.rows.length - i) < 10)
+                        sl = props.data.rows.length - i
+                    page_s[idx] = props.data.rows.slice(i,i+sl);
                     page_s[idx] = page_s[idx].filter((p) => p.index != 'undefined')
                     idx++;
                 }
@@ -167,5 +163,4 @@
         position:relative;
         float:left;
     }
-   
 </style>

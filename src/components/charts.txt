@@ -1,0 +1,869 @@
+    <div class="fxchart container">
+        <div class="row">
+            <div class="col-sm-4"></div>
+            <div class="col-sm-4">                       
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="inputGroupSelect01">Choose Chart Resolution</label>
+                    </div>
+                    <select v-model="selected" class="custom-select" id="inputGroupSelect01">
+                        <option>1 Times</option>
+                        <option>5 Times</option>
+                        <option>10 Times</option>
+                        <option>15 Times</option>
+                    </select>
+                </div>                     
+            </div>
+            <div class="col-sm-4"></div>
+        </div>
+    </div>
+    <div id="charts"  style="margin-top:-4em;transform:scale(0.8,0.8)">
+        <h4 style="color:red;background-color:lightgray;padding:0.25em;text-align:center">You Can Click Charts to Enlarge and Reduce</h4>
+        <div class="row">
+            <div id="flinec" class="col-sm-4">
+                <canvas id="lineChart" class="achart"></canvas>
+            </div>
+            <div id="flinecnew" class="col-sm-4">
+                <canvas id="newlineChart" class="achart"></canvas>
+            </div>
+            <div id="fpiec" class="col-sm-4">
+                <h3 id="pieheader" v-cloak>{{ the_pieheader }}</h3>
+                <canvas id="pieChart" class="achart"></canvas>
+            </div>
+        </div>
+
+        <div class="row">                   
+            <div id="fstackedc" class="col-sm-4">
+                <h1 id="stackedheader" v-cloak>{{ the_stackedheader }}</h1>
+                <canvas id="stackedChart" class="achart"></canvas>
+            </div>
+            <div id="flinecdiff" class="col-sm-4">
+                <canvas id="diffLineChart" class="achart"></canvas>
+            </div>
+            <div id="fstackedcbin" class="col-sm-4">
+                <canvas id="binStackedChart" class="achart"></canvas>
+            </div> 
+        </div>
+
+        <div class="row">                   
+            <div id="flinecper" class="col-sm-4">
+                <canvas id="perLineChart" class="achart"></canvas>
+            </div>
+            <!--<div id="" class="col-sm-4">
+            </div>
+            <div id="" class="col-sm-4">
+            </div>--> 
+        </div>
+    </div>
+
+<div id="charts"  style="margin-top:-4em;transform:scale(0.8,0.8)">
+        <h4 style="color:red;background-color:lightgray;padding:0.25em;text-align:center">You Can Click Charts to Enlarge and Reduce</h4>
+        <div class="row">
+            <div id="flinec" class="col-sm-4">
+                <canvas id="lineChart" class="achart"></canvas>
+            </div>
+            <div id="flinecnew" class="col-sm-4">
+                <canvas id="newlineChart" class="achart"></canvas>
+            </div>
+            <div id="fpiec" class="col-sm-4">
+                <h3 id="pieheader" v-cloak>{{ the_pieheader }}</h3>
+                <canvas id="pieChart" class="achart"></canvas>
+            </div>
+        </div>
+
+        <div class="row">                   
+            <div id="fstackedc" class="col-sm-4">
+                <h1 id="stackedheader" v-cloak>{{ the_stackedheader }}</h1>
+                <canvas id="stackedChart" class="achart"></canvas>
+            </div>
+            <div id="flinecdiff" class="col-sm-4">
+                <canvas id="diffLineChart" class="achart"></canvas>
+            </div>
+            <div id="fstackedcbin" class="col-sm-4">
+                <canvas id="binStackedChart" class="achart"></canvas>
+            </div> 
+        </div>
+
+        <div class="row">                   
+            <div id="flinecper" class="col-sm-4">
+                <canvas id="perLineChart" class="achart"></canvas>
+            </div>
+            <!--<div id="" class="col-sm-4">
+            </div>
+            <div id="" class="col-sm-4">
+            </div>--> 
+        </div>
+    </div>
+
+  <!--<canvas id="myChart" width="400" height="400"></canvas>-->
+    
+    <div class="fxchart container">
+        <div class="row">
+            <div class="col-sm-4"></div>
+            <div class="col-sm-4">                       
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="inputGroupSelect01">Choose Chart Resolution</label>
+                    </div>
+                    <select v-model="selected" class="custom-select" id="inputGroupSelect01">
+                        <option>1 Times</option>
+                        <option>5 Times</option>
+                        <option>10 Times</option>
+                        <option>15 Times</option>
+                    </select>
+                </div>                     
+            </div>
+            <div class="col-sm-4"></div>
+        </div>
+    </div>    
+  </div>
+  
+import {
+  Chart,
+  ArcElement,
+  LineElement,
+  BarElement,
+  PointElement,
+  BarController,
+  BubbleController,
+  DoughnutController,
+  LineController,
+  PieController,
+  PolarAreaController,
+  RadarController,
+  ScatterController,
+  CategoryScale,
+  LinearScale,
+  LogarithmicScale,
+  RadialLinearScale,
+  TimeScale,
+  TimeSeriesScale,
+  Decimation,
+  Filler,
+  Legend,
+  Title,
+  Tooltip,
+  SubTitle
+} from 'chart.js';
+
+Chart.register(
+  ArcElement,
+  LineElement,
+  BarElement,
+  PointElement,
+  BarController,
+  BubbleController,
+  DoughnutController,
+  LineController,
+  PieController,
+  PolarAreaController,
+  RadarController,
+  ScatterController,
+  CategoryScale,
+  LinearScale,
+  LogarithmicScale,
+  RadialLinearScale,
+  TimeScale,
+  TimeSeriesScale,
+  Decimation,
+  Filler,
+  Legend,
+  Title,
+  Tooltip,
+  SubTitle
+);
+
+//const myChart = new Chart(ctx, {...});
+
+ 
+//var myLineChart = null;
+//var myLineChart2 = null;
+//var myLineChart3 = null;
+//var myLineChart4 = null;
+///var myPieChart = null;
+//var myStackedChart = null;
+//var myStackedChart2 = null;
+//var voterows = [];
+
+//var race_data = {};
+
+//var state = 'michigan';
+//var state_url='https://static01.nyt.com/elections-assets/2020/data/api/2020-11-03/race-page/'+ state.toLowerCase().replace(/-/,'') + '/president.json';
+
+
+
+
+  
+  
+  /* eslint-disable */ 
+    export default {
+        name: Charts,
+ //this.start_tables(this.state_selected,this.sort_selected);       
+
+      //var this2 = this;
+      //console.log("This2: ", this2.$el);
+      
+/*
+      
+      $('#lineChart').on('click',function(){
+      
+          if($(this2.$el).find('#flinec').hasClass('col-sm-12')){
+              //$(this).parent().parent().find('#flinec').removeClass('col-sm-12').addClass('col-sm-4');
+              $(this2.$el).find('#flinec').removeClass('col-sm-12').addClass('col-sm-4');
+              $(this2.$el).find('#fpiec').add('#fstackedc').add('#flinecnew').add('#flinecdiff').add('#fstackedcbin').add('#flinecper').show();
+          } 
+          else{
+              $(this2.$el).find('#fpiec').add('#fstackedc').add('#flinecnew').add('#flinecdiff').add('#fstackedcbin').add('#flinecper').hide();
+              $(this2.$el).find('#flinec').removeClass('col-sm-4').addClass('col-sm-12').append($('#example_paginate'));
+          }
+      });
+
+      $('#newlineChart').on('click',function(){
+      
+          if($(this2.$el).find('#flinecnew').hasClass('col-sm-12')){
+              $(this2.$el).find('#flinecnew').removeClass('col-sm-12').addClass('col-sm-4');
+              $(this2.$el).find('#fpiec').add('#fstackedc').add('#flinec').add('#flinecdiff').add('#fstackedcbin').add('#flinecper').show();
+          } 
+          else{
+              $(this2.$el).find('#fpiec').add('#fstackedc').add('#flinec').add('#flinecdiff').add('#fstackedcbin').add('#flinecper').hide();
+              $(this2.$el).find('#flinecnew').removeClass('col-sm-4').addClass('col-sm-12');
+          }
+      }); 
+
+      $('#diffLineChart').on('click',function(){
+      
+          if($(this2.$el).find('#flinecdiff').hasClass('col-sm-12')){
+              $(this2.$el).find('#flinecdiff').removeClass('col-sm-12').addClass('col-sm-4');
+              $(this2.$el).find('#fpiec').add('#fstackedc').add('#flinec').add('#flinecnew').add('#fstackedcbin').add('#flinecper').show();
+          } 
+          else{
+              $(this2.$el).find('#fpiec').add('#fstackedc').add('#flinec').add('#flinecnew').add('#fstackedcbin').add('#flinecper').hide();
+              $(this2.$el).find('#flinecdiff').removeClass('col-sm-4').addClass('col-sm-12');
+          }
+      }); 
+
+
+      $('#perLineChart').on('click',function(){
+      
+          if($(this2.$el).find('#flinecper').hasClass('col-sm-12')){
+              $(this2.$el).find('#flinecper').removeClass('col-sm-12').addClass('col-sm-4');
+              $(this2.$el).find('#fpiec').add('#fstackedc').add('#flinec').add('#flinecnew').add('#fstackedcbin').add('#flinecdiff').show();
+          } 
+          else{
+              $(this2.$el).find('#fpiec').add('#fstackedc').add('#flinec').add('#flinecnew').add('#fstackedcbin').add('#flinecdiff').hide();
+              $(this2.$el).find('#flinecper').removeClass('col-sm-4').addClass('col-sm-12');
+          }
+      }); 
+
+
+      $('#pieChart').on('click',function(){
+          //alert('ok');
+          if($('#fpiec').hasClass('col-sm-12')){
+              $('#fpiec').removeClass('col-sm-12').addClass('col-sm-4');
+              $('#flinec').add('#fstackedc').add('#flinecnew').add('#flinecdiff').add('#fstackedcbin').add('#flinecper').show();
+          } 
+          else{
+              $('#flinec').add('#fstackedc').add('#flinecnew').add('#flinecdiff').add('#fstackedcbin').add('#flinecper').hide();
+              $('#fpiec').removeClass('col-sm-4').addClass('col-sm-12');
+          }
+      });
+  
+      $('#stackedChart').on('click',function(){
+          //alert('ok');
+          if($('#fstackedc').hasClass('col-sm-12')){
+              $('#fstackedc').removeClass('col-sm-12').addClass('col-sm-4');
+              $('#flinec').add('#fpiec').add('#flinecnew').add('#flinecdiff').add('#fstackedcbin').add('#flinecper').show();
+          } 
+          else{
+              $('#flinec').add('#fpiec').add('#flinecnew').add('#flinecdiff').add('#fstackedcbin').add('#flinecper').hide();
+              $('#fstackedc').removeClass('col-sm-4').addClass('col-sm-12');
+          }
+      });
+
+      $('#binStackedChart').on('click',function(){
+          //alert('ok');
+          if($('#fstackedcbin').hasClass('col-sm-12')){
+              $('#fstackedcbin').removeClass('col-sm-12').addClass('col-sm-4');
+              $('#flinec').add('#fpiec').add('#flinecnew').add('#flinecdiff').add('#fstackedc').add('#flinecper').show();
+          } 
+          else{
+              $('#flinec').add('#fpiec').add('#flinecnew').add('#flinecdiff').add('#fstackedc').add('#flinecper').hide();
+              $('#fstackedcbin').removeClass('col-sm-4').addClass('col-sm-12');
+          }
+      });
+      */
+       
+// Function used to Display Line Chart based on ChartFx Jquery Plugin
+  linechart:function(){
+      this.date_headers = this.dateheaders_store[this.selectedindex];
+      this.datedata_biden = this.datedatabiden_store[this.selectedindex];
+      this.datedata_trump = this.datedatatrump_store[this.selectedindex];
+      this.datedata_other = this.datedataother_store[this.selectedindex];
+      var canvas = document.getElementById("lineChart");
+      var ctx = canvas.getContext('2d');
+
+      
+
+      // Global Options:
+      //Chart.defaults.global.defaultFontColor = 'black';
+      //Chart.defaults.global.defaultFontSize = 16;
+
+      var data = {
+      labels: this.date_headers,
+      datasets: [{
+          label: "Trump Votes",
+          fill: true,
+          lineTension: 0.1,
+          backgroundColor: "rgba(167,105,0,0.4)",
+          borderColor: "rgb(167, 105, 0)",
+          borderCapStyle: 'butt',
+          borderDash: [],
+          borderDashOffset: 0.0,
+          borderJoinStyle: 'miter',
+          pointBorderColor: "white",
+          pointBackgroundColor: "black",
+          pointBorderWidth: 1,
+          pointHoverRadius: 8,
+          pointHoverBackgroundColor: "brown",
+          pointHoverBorderColor: "yellow",
+          pointHoverBorderWidth: 2,
+          pointRadius: 4,
+          pointHitRadius: 10,
+          // notice the gap in the data and the spanGaps: false
+          data: this.datedata_trump,
+          spanGaps: false,
+          },{
+          label: "Biden Votes",
+          fill: false,
+          lineTension: 0.1,
+          backgroundColor: "rgba(225,0,0,0.4)",
+          borderColor: "red", // The main line color
+          borderCapStyle: 'square',
+          borderDash: [], // try [5, 15] for instance
+          borderDashOffset: 0.0,
+          borderJoinStyle: 'miter',
+          pointBorderColor: "black",
+          pointBackgroundColor: "white",
+          pointBorderWidth: 1,
+          pointHoverRadius: 8,
+          pointHoverBackgroundColor: "yellow",
+          pointHoverBorderColor: "brown",
+          pointHoverBorderWidth: 2,
+          pointRadius: 4,
+          pointHitRadius: 10,
+          // notice the gap in the data and the spanGaps: true
+          data: this.datedata_biden,
+          spanGaps: true,
+          }, {
+          label: "Other Votes",
+          fill: true,
+          lineTension: 0.1,
+          backgroundColor: "rgba(86,105,0,0.4)",
+          borderColor: "rgb(86, 105, 0)",
+          borderCapStyle: 'butt',
+          borderDash: [],
+          borderDashOffset: 0.0,
+          borderJoinStyle: 'miter',
+          pointBorderColor: "white",
+          pointBackgroundColor: "black",
+          pointBorderWidth: 1,
+          pointHoverRadius: 8,
+          pointHoverBackgroundColor: "brown",
+          pointHoverBorderColor: "yellow",
+          pointHoverBorderWidth: 2,
+          pointRadius: 4,
+          pointHitRadius: 10,
+          // notice the gap in the data and the spanGaps: false
+          data: this.datedata_other,
+          spanGaps: false,
+          }
+
+      ]
+      };
+
+      // Notice the scaleLabel at the same level as Ticks
+      var options = {
+        scales: {
+                yAxis: {}      
+              }  
+      };
+
+      if(myLineChart){
+          myLineChart.destroy();
+      }
+      // Chart declaration:
+      myLineChart = new Chart(ctx, {
+          type: 'line',
+          data: data,
+          options: options
+          });
+      },
+
+      linechart2:function(){
+          this.date_headers = this.dateheaders_store[this.selectedindex];
+          this.datedata_biden_add = this.datedatabidenadd_store[this.selectedindex];
+          this.datedata_trump_add = this.datedatatrumpadd_store[this.selectedindex];
+          this.datedata_other_add = this.datedataotheradd_store[this.selectedindex];
+          this.datedata_total_add = this.datedatatotaladd_store[this.selectedindex];
+          var canvas = document.getElementById("newlineChart");
+          var ctx = canvas.getContext('2d');
+
+          
+
+          // Global Options:
+         // Chart.defaults.global.defaultFontColor = 'black';
+          //Chart.defaults.global.defaultFontSize = 16;
+
+          var data = {
+          labels: this.date_headers,
+          datasets: [{
+              label: "Trump Spike",
+              fill: true,
+              lineTension: 0.1,
+              backgroundColor: "rgba(167,105,0,0.4)",
+              borderColor: "rgb(167, 105, 0)",
+              borderCapStyle: 'butt',
+              borderDash: [],
+              borderDashOffset: 0.0,
+              borderJoinStyle: 'miter',
+              pointBorderColor: "white",
+              pointBackgroundColor: "black",
+              pointBorderWidth: 1,
+              pointHoverRadius: 8,
+              pointHoverBackgroundColor: "brown",
+              pointHoverBorderColor: "yellow",
+              pointHoverBorderWidth: 2,
+              pointRadius: 4,
+              pointHitRadius: 10,
+              // notice the gap in the data and the spanGaps: false
+              data: this.datedata_trump_add,
+              spanGaps: false,
+              },{
+              label: "Biden Spike",
+              fill: false,
+              lineTension: 0.1,
+              backgroundColor: "rgba(225,0,0,0.4)",
+              borderColor: "red", // The main line color
+              borderCapStyle: 'square',
+              borderDash: [], // try [5, 15] for instance
+              borderDashOffset: 0.0,
+              borderJoinStyle: 'miter',
+              pointBorderColor: "black",
+              pointBackgroundColor: "white",
+              pointBorderWidth: 1,
+              pointHoverRadius: 8,
+              pointHoverBackgroundColor: "yellow",
+              pointHoverBorderColor: "brown",
+              pointHoverBorderWidth: 2,
+              pointRadius: 4,
+              pointHitRadius: 10,
+              // notice the gap in the data and the spanGaps: true
+              data: this.datedata_biden_add,
+              spanGaps: true,
+              }, {
+              label: "Other Spike",
+              fill: true,
+              lineTension: 0.1,
+              backgroundColor: "rgba(86,105,0,0.4)",
+              borderColor: "rgb(86, 105, 0)",
+              borderCapStyle: 'butt',
+              borderDash: [],
+              borderDashOffset: 0.0,
+              borderJoinStyle: 'miter',
+              pointBorderColor: "white",
+              pointBackgroundColor: "black",
+              pointBorderWidth: 1,
+              pointHoverRadius: 8,
+              pointHoverBackgroundColor: "brown",
+              pointHoverBorderColor: "yellow",
+              pointHoverBorderWidth: 2,
+              pointRadius: 4,
+              pointHitRadius: 10,
+              // notice the gap in the data and the spanGaps: false
+              data: this.datedata_other_add,
+              spanGaps: false,
+              },{
+              label: "Total Spike",
+              fill: true,
+              lineTension: 0.1,
+              backgroundColor: "lightblue",
+              borderColor: "blue",
+              borderCapStyle: 'butt',
+              borderDash: [],
+              borderDashOffset: 0.0,
+              borderJoinStyle: 'miter',
+              pointBorderColor: "white",
+              pointBackgroundColor: "black",
+              pointBorderWidth: 1,
+              pointHoverRadius: 8,
+              pointHoverBackgroundColor: "brown",
+              pointHoverBorderColor: "yellow",
+              pointHoverBorderWidth: 2,
+              pointRadius: 4,
+              pointHitRadius: 10,
+              // notice the gap in the data and the spanGaps: false
+              data: this.datedata_total_add,
+              spanGaps: false,
+              }
+
+          ]
+          };
+
+          // Notice the scaleLabel at the same level as Ticks
+          var options = {
+          scales: {
+                      yAxis: {}  
+                  }  
+          };
+
+          if(myLineChart2){
+              myLineChart2.destroy();
+          }
+          // Chart declaration:
+          myLineChart2 = new Chart(ctx, {
+              type: 'line',
+              data: data,
+              options: options
+              });
+      },
+
+
+      linechart3:function(){
+          this.date_headers = this.dateheaders_store[this.selectedindex];
+          this.datedata_biden_diff_add = this.datedatabidenadddiff_store[this.selectedindex];
+          this.datedata_trump_diff_add = this.datedatatrumpadddiff_store[this.selectedindex];
+          var canvas = document.getElementById("diffLineChart");
+          var ctx = canvas.getContext('2d');
+
+          
+
+          // Global Options:
+          //Chart.defaults.global.defaultFontColor = 'black';
+          //Chart.defaults.global.defaultFontSize = 16;
+
+          var data = {
+          labels: this.date_headers,
+          datasets: [{
+              label: "Trump Gain/Loss",
+              fill: true,
+              lineTension: 0.1,
+              backgroundColor: "rgba(167,105,0,0.4)",
+              borderColor: "rgb(167, 105, 0)",
+              borderCapStyle: 'butt',
+              borderDash: [],
+              borderDashOffset: 0.0,
+              borderJoinStyle: 'miter',
+              pointBorderColor: "white",
+              pointBackgroundColor: "black",
+              pointBorderWidth: 1,
+              pointHoverRadius: 8,
+              pointHoverBackgroundColor: "brown",
+              pointHoverBorderColor: "yellow",
+              pointHoverBorderWidth: 2,
+              pointRadius: 4,
+              pointHitRadius: 10,
+              // notice the gap in the data and the spanGaps: false
+              data: this.datedata_trump_diff_add,
+              spanGaps: false,
+              },{
+              label: "Biden Gain/Loss",
+              fill: false,
+              lineTension: 0.1,
+              backgroundColor: "rgba(225,0,0,0.4)",
+              borderColor: "red", // The main line color
+              borderCapStyle: 'square',
+              borderDash: [], // try [5, 15] for instance
+              borderDashOffset: 0.0,
+              borderJoinStyle: 'miter',
+              pointBorderColor: "black",
+              pointBackgroundColor: "white",
+              pointBorderWidth: 1,
+              pointHoverRadius: 8,
+              pointHoverBackgroundColor: "yellow",
+              pointHoverBorderColor: "brown",
+              pointHoverBorderWidth: 2,
+              pointRadius: 4,
+              pointHitRadius: 10,
+              // notice the gap in the data and the spanGaps: true
+              data: this.datedata_biden_diff_add,
+              spanGaps: true,
+              }
+          ]
+          };
+
+          // Notice the scaleLabel at the same level as Ticks
+          var options = {
+          scales: {
+                      yAxis: {}  
+                  }  
+          };
+
+          if(myLineChart3){
+              myLineChart3.destroy();
+          }
+          // Chart declaration:
+          myLineChart3 = new Chart(ctx, {
+              type: 'line',
+              data: data,
+              options: options
+              });
+      },
+
+      linechart4:function(){
+          this.date_headers = this.dateheaders_store[this.selectedindex];
+          var pertrump = this.perremainingtrump_store[this.selectedindex];
+          var perbiden = this.perremainingbiden_store[this.selectedindex];
+          var canvas = document.getElementById("perLineChart");
+          var ctx = canvas.getContext('2d');
+
+          
+
+          // Global Options:
+          //Chart.defaults.global.defaultFontColor = 'black';
+          //Chart.defaults.global.defaultFontSize = 16;
+
+          var data = {
+          labels: this.date_headers,
+          datasets: [{
+              label: "Trump % of Remaining Vote",
+              fill: true,
+              lineTension: 0.1,
+              backgroundColor: "rgba(167,105,0,0.4)",
+              borderColor: "rgb(167, 105, 0)",
+              borderCapStyle: 'butt',
+              borderDash: [],
+              borderDashOffset: 0.0,
+              borderJoinStyle: 'miter',
+              pointBorderColor: "white",
+              pointBackgroundColor: "black",
+              pointBorderWidth: 1,
+              pointHoverRadius: 8,
+              pointHoverBackgroundColor: "brown",
+              pointHoverBorderColor: "yellow",
+              pointHoverBorderWidth: 2,
+              pointRadius: 4,
+              pointHitRadius: 10,
+              // notice the gap in the data and the spanGaps: false
+              data: pertrump,
+              spanGaps: false,
+              },{
+              label: "Biden % of Remaining Vote",
+              fill: false,
+              lineTension: 0.1,
+              backgroundColor: "rgba(225,0,0,0.4)",
+              borderColor: "red", // The main line color
+              borderCapStyle: 'square',
+              borderDash: [], // try [5, 15] for instance
+              borderDashOffset: 0.0,
+              borderJoinStyle: 'miter',
+              pointBorderColor: "black",
+              pointBackgroundColor: "white",
+              pointBorderWidth: 1,
+              pointHoverRadius: 8,
+              pointHoverBackgroundColor: "yellow",
+              pointHoverBorderColor: "brown",
+              pointHoverBorderWidth: 2,
+              pointRadius: 4,
+              pointHitRadius: 10,
+              // notice the gap in the data and the spanGaps: true
+              data: perbiden,
+              spanGaps: true,
+              }
+          ]
+          };
+
+          // Notice the scaleLabel at the same level as Ticks
+          var options = {
+          scales: {
+              yAxis: {}  
+                  }  
+          };
+
+          if(myLineChart4){
+              myLineChart4.destroy();
+          }
+          // Chart declaration:
+          myLineChart4 = new Chart(ctx, {
+              type: 'line',
+              data: data,
+              options: options
+              });
+      },
+
+
+
+
+
+
+
+
+
+  piechart: function(){
+      var oilCanvas = document.getElementById("pieChart");
+
+      //Chart.defaults.global.defaultFontFamily = "Lato";
+      //Chart.defaults.global.defaultFontSize = 18;
+
+      this.the_pieheader = this.pie_headers[this.selectedindex]; 
+      console.log(this.the_pieheader);
+
+      var oilData = {
+          labels: [
+              "Trump Votes",
+              "Biden Votes",
+              "Other Votes"
+          ],
+          datasets: [
+              {
+                  data: [this.trump_slices[this.selectedindex], this.biden_slices[this.selectedindex],this.other_slices[this.selectedindex]],
+                  backgroundColor: [
+                      "rgba(167,105,0,0.4)",
+                      "red",
+                      "rgba(86,105,0,0.4)"
+                  ],
+                  borderColor:[
+                      "rgb(167, 105, 0)",
+                      "red",
+                      "rgb(86, 105, 0)"
+
+                  ]
+              }]
+      };
+
+      if(myPieChart){
+          myPieChart.destroy();
+      }
+
+      myPieChart = new Chart(oilCanvas, {
+      type: 'pie',
+      data: oilData
+      });
+  },
+  stackedchart: function(){
+      this.date_headers = this.dateheaders_store[this.selectedindex];
+      this.datedata_biden = this.datedatabiden_store[this.selectedindex];
+      this.datedata_trump = this.datedatatrump_store[this.selectedindex];
+      this.datedata_other = this.datedataother_store[this.selectedindex];
+
+      window.chartColors = {
+      red: 'rgb(255, 99, 132)',
+      orange: 'rgb(255, 159, 64)',
+      yellow: 'rgb(255, 205, 86)',
+      green: 'rgb(75, 192, 192)',
+      blue: 'rgb(54, 162, 235)',
+      purple: 'rgb(153, 102, 255)',
+      grey: 'rgb(231,233,237)'
+      };
+
+      var ctx = document.getElementById("stackedChart").getContext("2d");
+
+      
+      if(myStackedChart){
+          myStackedChart.destroy();
+      }
+      myStackedChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+          labels:  this.date_headers,
+          datasets: [{
+          type: 'bar',
+          label: 'Trump Votes',
+          backgroundColor: "rgba(167,105,0,0.4)",
+          borderColor: "rgb(167, 105, 0)",
+          stack: 'Stack 0',
+          borderWidth: 2,
+          data: this.datedata_trump
+          }, {
+          type: 'bar',
+          label: 'Biden Votes',
+          backgroundColor: "red",
+          borderColor:"red",
+          stack: 'Stack 0',
+          data: this.datedata_biden,
+          borderWidth: 2
+          }, {
+          type: 'bar',
+          label: 'Other Votes',
+          backgroundColor: "rgba(86,105,0,0.4)",
+          borderColor:"rgb(86, 105, 0)",
+          stack: 'Stack 0',
+          data: this.datedata_other
+          }]
+      },
+      options: {
+          responsive: true,
+          title: {
+          display: true,
+          text: 'Vote Totals Per Time Interval'
+          },
+          tooltips: {
+          mode: 'index',
+          intersect: true
+          },
+          scales: {
+            xAxis: {}
+          }
+      }
+      });
+  },
+  stackedchart2: function(){
+      //this.bin_headers = [];
+      
+
+      window.chartColors = {
+      red: 'rgb(255, 99, 132)',
+      orange: 'rgb(255, 159, 64)',
+      yellow: 'rgb(255, 205, 86)',
+      green: 'rgb(75, 192, 192)',
+      blue: 'rgb(54, 162, 235)',
+      purple: 'rgb(153, 102, 255)',
+      grey: 'rgb(231,233,237)'
+      };
+
+      var ctx = document.getElementById("binStackedChart").getContext("2d");
+
+      
+      if(myStackedChart2){
+          myStackedChart2.destroy();
+      }
+      myStackedChart2 = new Chart(ctx, {
+          type: 'bar',
+          data: {
+              labels: this.bin_headers[this.selectedindex],
+              datasets: [{
+              type: 'bar',
+              label: 'Number for Trump',
+              backgroundColor: "rgba(167,105,0,0.4)",
+              borderColor: "rgb(167, 105, 0)",
+              stack: 'Stack 0',
+              borderWidth: 2,
+              data: this.bin_trump[this.selectedindex]
+              }, {
+              type: 'bar',
+              label: 'Number for Biden',
+              backgroundColor: "red",
+              borderColor:"red",
+              stack: 'Stack 0',
+              data: this.bin_biden[this.selectedindex],
+              borderWidth: 2
+              }]
+          },
+          options: {
+              responsive: true,
+              title: {
+              display: true,
+              text: 'Number of Gains within Gain Size Interval'
+              },
+              tooltips: {
+              mode: 'index',
+              intersect: true
+              },
+              scales: {
+                xAxis: {}
+              }
+          }
+      });
+  }
+}
+   
+
