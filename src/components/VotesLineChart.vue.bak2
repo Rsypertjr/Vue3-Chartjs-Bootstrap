@@ -1,0 +1,45 @@
+<script>
+  import { Line, mixins } from "vue-chartjs";
+  const { reactiveProp } = mixins;
+  export default {
+    extends: Line,
+    mixins: [reactiveProp],
+    props: ["data"],
+    data() {
+      return{
+        chartData: {},
+        options: {}
+      }
+    },
+    mounted() {
+      this.chatData =  {
+          labels: this.data.dateheaders,
+          datasets: [
+                {
+                    label: "Trump Votes",
+                    data: this.data.datedata_trump,
+                    fill: false,
+                    borderColor: "#4bc0c0",
+                },
+                {
+                    label: "Biden Votes",
+                    data: this.data.datedata_biden,
+                    fill: false,
+                    borderColor: "#565656",
+                },
+                {
+                    label: "Other Votes",
+                    data: this.data.datedata_other,
+                    fill: false,
+                    borderColor: "#565656",
+                }
+          ]
+        },
+      this.options = {
+        responsive: true,
+        maintainAspectRatio: false
+      };
+      this.renderChart(this.chartData, this.options);
+    }
+  };
+  </script>

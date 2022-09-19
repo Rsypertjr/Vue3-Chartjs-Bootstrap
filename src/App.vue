@@ -1,8 +1,8 @@
 <template>
     
     <div id = "results_table" class="container">
-        <div id="tophdr" class="container-fluid mb-5">
-            <div class=" d-flex justify-content-center input-group mb-3" style="margin-top:2em">
+        <div id="tophdr" class="container-fluid m-2">
+            <div class=" d-flex justify-content-center input-group m-2">
                 <div class="input-group-prepend">
                     <label class="input-group-text" for="inputGroupSelect01">Choose State</label>
                 </div>
@@ -39,7 +39,7 @@
                                 <span @click="votestable" class="nav-link">VotesTable</span>
                             </li>
                             <li class="nav-item">
-                                <span @click="linechart" class="nav-link">LineChart</span>
+                                <span @click="voteslinechart" class="nav-link">Votes LineChart</span>
                             </li>
                             <li class="nav-item">
                                 <span @click="helloworld" class="nav-link">Hello World</span>
@@ -60,8 +60,8 @@
                     <button type="button" @click="close" class="btn btn-dark pager-btn">Close</button> 
                 </div>
                 <div class="row d-flex justify-content-center">
-                    <component  :is="activeComponent" :data="activeData"></component> 
-                </div>                   
+                    <component  :is="activeComponent" :activeData="active_data" :isClosed="isClosed" @update-page-top="handleUpdatePageTop"></component> 
+                </div>                               
             </div>
            
         </div>
@@ -73,16 +73,19 @@
 import $ from "jquery";
 import 'datatables.net-dt';
 import VotesTable from './components/VotesTable.vue'
-import LineChart from './components/LineChart.vue'
+import VotesLineChart from './components/VotesLineChart.vue'
 import HelloWorld from './components/HelloWorld.vue'
+import BarChart from './components/BarChart.vue'
+//import PlanetChart from './components/PlanetChart.vue'
 
 export default {
   
   name: 'App',
   components: {
     VotesTable,
-    LineChart,
-    HelloWorld
+    VotesLineChart,
+    HelloWorld,
+    BarChart
   
   },
   data() {
@@ -108,7 +111,7 @@ export default {
             timeseries: {},
             vote_rows: [],
             race_info: {},
-            selectedindex: 0,
+            selectedindex: 1,
             trump_votes_decrease: [],
             biden_votes_decrease: [],
             total_biden_increase: 0,
@@ -154,10 +157,14 @@ export default {
             ttable:'',                           
             vote_bins: [],
             number_pages: 0,
+            pageSize: 10,
             step: 0,
             table:'',
             activeComponent:'',
-            activeData: []
+            activeData: [],
+            showChart: false,
+            zoomC: '0.9',
+            isClosed: false
         }
       },
   watch:{
@@ -182,19 +189,43 @@ export default {
       
       state : function(val){
           //$("#results_table").css("display","none");
-          this.state = val;
-          this.get_data(this.state);
+          this.state = val;  
+          this.close();       
+          this.get_data(this.state).then(()=>{
+          switch(this.activeComponent){
+                case 'VotesTable':
+                    this.votestable();
+                    break;
+                case 'VotesLineChart':
+                    this.voteslinechart();
+                    break;
+                default:
+                    break;
+            }
+         
+          });
+          
+          
+       
           //this.start_tables(val,this.sort_selected);   
       },
+      isModalVisible: function() {
+        if(this.isModalVisible){
+            document.documentElement.style.overflow = 'hidden'
+            return
+        }
+
+        document.documentElement.style.overflow = 'auto'
+    } 
 
   },                                                 
   
   mounted() {
       
     console.log("getting started")
-    this.get_data(this.state);
-   
-   
+    this.get_data(this.state).then( () => {
+        this.parse_vote()
+    });
   },
   updated(){
    
@@ -219,16 +250,61 @@ export default {
           },
         votestable(){               
             this.activeComponent = "VotesTable"
+            this.zoomC = '0.90';
             this.activeData = {
                 rows: this.vote_rows,
                 headers: this.headers
             }
             this.open();          
         },
-        linechart(){
-            this.activeComponent = "LineChart"
-            this.activeData = {}
-            this.open();
+        voteslinechart(){
+            this.activeComponent = "VotesLineChart"
+            this.zoomC = '0.8'
+           
+            let data_sets = [];
+            let obj = {
+                data: Object.values(this.datedatatrump_store[this.selectedindex]),
+                label: "Trump Votes",
+                backgroundColor: "rgba(54,73,93,.5)",
+                borderColor: "#36495d",
+                borderWidth: 3
+            };
+            data_sets.push(obj);
+            obj = {
+                data : Object.values(this.datedatabiden_store[this.selectedindex]),
+                label : "Biden Votes",
+                backgroundColor : "rgba(71, 183,132,.5)",
+                borderColor : "#47b784",
+                borderWidth : 3
+            };
+            data_sets.push(obj)
+            obj = {
+                data: Object.values(this.datedataother_store[this.selectedindex]),
+                label: "Other Votes",
+                backgroundColor: "lightblue",
+                borderColor: "blue",
+                borderWidth: 3
+            };
+            data_sets.push(obj);
+            console.log("Data Sets: ", data_sets)
+            this.activeData = { 
+                
+                type: "line",
+                rows: this.vote_rows,
+                data: {
+                    labels: Object.values(this.dateheaders_store[this.selectedindex]),
+                    datasets: data_sets
+                },
+                options: {
+                    responsive: true,
+                    lineTension: 1,
+                    scales: {
+                            yAxis:{}
+                        }
+                }
+            }
+            if(this.selectedindex == 1)
+                this.open();
         },
        helloworld(){
             this.activeComponent = "HelloWorld"
@@ -238,15 +314,28 @@ export default {
             this.open();
        },
        open(){
-            $('#dyn_component').animate({marginTop:'-10em',opacity:'0.9',zoom:'80%'},{duration:"slow"}, {easing:"easein"});
+           window.scrollBy(0,500)
+            $('#dyn_component').animate({marginTop:'-15em',opacity:'0.8'},{duration:"slow"}, {easing:"easein"}).css('transform','scale('+this.zoomC+')');
+            this.zoomC = '1.0',
+            this.isClosed = false;
+           
        },
        close(){
-            $('#dyn_component').animate({marginTop:'0em',opacity:'0',zoom:'100%'},{duration:"fast"}, {easing:"easein"});
-       },     
+            $('#dyn_component').animate({marginTop:'0em',opacity:'0'},{duration:"fast"}, {easing:"easein"});
+            this.zoomC = '1.0' 
+            this.isClosed = true;
+            this.selectedindex = 1;
+
+       },    
+       handleUpdatePageTop(pageNum){
+        this.selectedindex = pageNum
+        this.voteslinechart()
+
+       }, 
        parse_data() {
             //console.log("Selected Sort:",selected_sort)
             console.log("Race Data:", this.race_info);
-            console.log(this.timeseries);
+            console.log("Timeseries: ",this.timeseries);
 
             // Parse Votes for Master Table
             function calc_votes(votes,index){
@@ -412,12 +501,13 @@ export default {
                 
                 }, 500);
                 */
+                this.fill_votebins();
     
       },
       start_tables: function(state,sort){
           
           $('.loader').show();
-          this.parse_data(sort);  
+        //  this.parse_data(sort);  
 
         
           
@@ -426,7 +516,7 @@ export default {
           
           
       },
-      parse_vote: function(){
+      parse_vote(){
             // Derive Headers and Data for Line Chart
               
               var dateheaders = [];
@@ -602,7 +692,7 @@ export default {
 
   
       },
-      fill_votebins: function(){
+      fill_votebins(){
 
           // Set up Vote Bins
           let index = 0;
@@ -614,7 +704,8 @@ export default {
               "trump_in_bin":0,
           };
         
-              
+          this.number_pages = Math.ceil(this.vote_rows.length/this.pageSize)  
+          console.log("Number of Pages: ",this.number_pages)
           let step = parseInt(200000/(this.number_pages*10));
           //let step = 2500;
           
@@ -625,7 +716,7 @@ export default {
               vote_bin.trump_in_bin = 0;
               vote_bin.biden_in_bin = 0;
               this.vote_bins[index] = vote_bin;
-              //console.log("Vote Bins: ",this.vote_bins[index]);
+           
               index++;
               interval = interval + step;
               
@@ -636,7 +727,6 @@ export default {
               };
 
           }
-          
 
 
           // Put in Biden Bins
@@ -649,8 +739,7 @@ export default {
                           if(store[k] < this.vote_bins[l].interval && store[k] >= this.vote_bins[l-1].interval)
                               this.vote_bins[l].biden_in_bin++;
                   }
-              }
-              //console.log("Store:",store);
+              }          
           }
 
           // Put in Trump Bins
@@ -658,13 +747,11 @@ export default {
               let store = this.datedatatrumpadddiff_store[j];
               for(let k=0;k < store.length;k++){
                   for(let l = 0;l < this.vote_bins.length;l++){
-                      //console.log("Store value:",store[k]);
                       if(l > 0)
                           if(store[k] < this.vote_bins[l].interval && store[k] >= this.vote_bins[l-1].interval)
                               this.vote_bins[l].trump_in_bin++;
                   }
-              }
-              //console.log("Store:",store);
+              }            
           }
           console.log("Vote Bins: ",this.vote_bins);
 
@@ -720,6 +807,9 @@ computed: {
         selected_index : function(){
             console.log("New Selected Index:", this.selectedindex);
             return this.selectedindex
+        },
+        active_data : function(){
+            return this.activeData
         }
         
     }
@@ -728,6 +818,7 @@ computed: {
 </script>
 
 <style>
+ 
   #app {
     font-family: Avenir, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -749,7 +840,7 @@ computed: {
 
   }
   div.jumbotron p{
-          font-size:1.35em;
+          font-size:1.0em;
           text-align:center
         }
 
@@ -810,5 +901,6 @@ computed: {
     -moz-transition: all 1s linear;
     -o-transition: all 1s linear;
     transition: all 1s linear;
+    overflow:hidden;
   }
 </style>

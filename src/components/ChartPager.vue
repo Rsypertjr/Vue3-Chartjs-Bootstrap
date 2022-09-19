@@ -1,22 +1,5 @@
 <template>
-    <div class="container-fluid mb-5" >       
-        <table v-if="pages.length > 0" class="table">
-            <thead>
-                <tr>
-                    <th scope="col" v-for="header in activeData.headers" :key="header">{{ header }}</th>          
-                </tr>
-            </thead>
-            <thead></thead>
-            <tbody>
-                <tr v-for = "row in pageArray" :key="row">  
-                    <td v-for="cell in row" :key="cell">
-                        {{cell}}
-                        
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <div class="row d-flex justify-content-center">
+    <div class="row d-flex justify-content-center">
             <div class="d-flex justify-content-center">
                 <button type="button" @click="previous" class="btn btn-light pager-btn">Previous</button>   
                 <div  v-for="pg in pageArray.keys()"  :key="pg"  class="pager-btn"  >
@@ -27,18 +10,20 @@
                 <button type="button" @click="next" class="btn btn-light pager-btn">Next</button>
             </div>      
         </div>
-    </div>    
 </template>
-<script>
-    import { ref, computed, watchEffect, onMounted, onUpdated } from 'vue'
-    import $ from 'jquery'
 
-    export default{
+
+<script>
+    import { ref, onMounted, onUpdated, computed, watchEffect } from 'vue'
+    import $ from 'jquery'
+    export default {
+
         props: {
-            activeData: Array
+            rows: Array,
+            isClosed: Boolean
         },
 
-        setup(props){
+        setup(props,context){
             let pageSize = ref(10);
             let currentPage = ref(1);
             let pageArrayIndex = ref(0);
@@ -46,24 +31,26 @@
 
             onMounted(() => {
                 hlitePage(1)
+                currentPage.value = 1
             })
 
             onUpdated(()=> {
                 console.log("Current Page: ", currentPage.value)  
                 hlitePage(currentPage.value)
+               
             })
            
 
-            console.log("Prop rows: ",props.activeData.rows);
+            console.log("Prop rows: ",props.rows);
             const pages = computed(() => {
                 let page_s = [];
                 let idx = 0;
               
-                for(let i = 0;i < props.activeData.rows.length;i += pageSize.value){
+                for(let i = 0;i < props.rows.length;i += pageSize.value){
                     let sl = pageSize.value;
-                    if((props.activeData.rows.length - i) < 10)
-                        sl = props.activeData.rows.length - i
-                    page_s[idx] = props.activeData.rows.slice(i,i+sl);
+                    if((props.rows.length - i) < 10)
+                        sl = props.rows.length - i
+                    page_s[idx] = props.rows.slice(i,i+sl);
                     page_s[idx] = page_s[idx].filter((p) => p.index != 'undefined')
                     idx++;
                 }
@@ -87,18 +74,21 @@
             //methods
             function showPage(num){
                 currentPage.value = num;
+                context.emit("updatePage",currentPage.value) 
             }
 
             function next(){
                
                 if(currentPage.value < pages.value.length){ 
-                    currentPage.value++                  
+                    currentPage.value++
+                                     
                     let chk = (currentPage.value-1) % 10 == 0;
                     console.log("Check: ",chk)
                     if(chk){
                         pageArrayIndex.value += 10  
                         //currentPage.value++                   
-                    }                    
+                    }            
+                    context.emit("updatePage",currentPage.value)         
                 }
                 else if(currentPage.value > pages.value.length) {
                    console.log("end condition...")
@@ -109,12 +99,14 @@
 
             function previous(){
                 currentPage.value--
+                
                 if(currentPage.value >= 1){   
                     let chk = currentPage.value % 10 == 0;
                     console.log("Check: ",chk)
                     if(chk){
                         pageArrayIndex.value -= 10                        
                     }
+                    context.emit("updatePage",currentPage.value)
                 }
                 else{
                     pageArrayIndex.value = 0;
@@ -135,6 +127,8 @@
                         currentPage.value = 1;
                         pageArrayIndex.value = 0;
                     }
+                    if(props.isClosed == true)
+                        currentPage.value = 1
                     
                     hlitePage(currentPage.value)
             });
@@ -153,14 +147,6 @@
                 previous
             }
         },
+
     };
 </script>
-<style>
-    .table {
-        zoom: 75%;
-    }
-    .pager-btn{
-        position:relative;
-        float:left;
-    }
-</style>
