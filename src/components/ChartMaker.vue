@@ -26,27 +26,22 @@ import { Chart, registerables } from 'chart.js'
       },    
      
       setup(props,context){
-        onMounted(() => {
-            
+        onMounted(() => {            
             ctx = document.getElementById('votes-line-chart')
             theChart = new Chart(ctx, props.activeData);
         })
 
-        onUpdated(() => {
-          ctx = document.getElementById('votes-line-chart')
-          if(theChart != null){
-            let temp = theChart
-            theChart.destroy()
-            theChart = temp
-          }
-          else
-            ctx = document.getElementById('votes-line-chart')
-            theChart = new Chart(ctx, props.activeData);
+        onUpdated(() => {     
+          theChart.data.labels = props.activeData.data.labels
+          theChart.data.datasets[0] = props.activeData.data.datasets[0]
+          theChart.data.datasets[1] = props.activeData.data.datasets[1]
+          theChart.data.datasets[2] = props.activeData.data.datasets[2]
+          theChart.update()
+          console.log("Updated theChart",theChart)
         })
    
-        // method
+        // methods
         function handleUpdatePage(pageNo){
-            //alert(pageNo)
             context.emit("updatePageTop",pageNo)
           }
 

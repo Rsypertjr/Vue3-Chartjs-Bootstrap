@@ -73,9 +73,8 @@
 import $ from "jquery";
 import 'datatables.net-dt';
 import VotesTable from './components/VotesTable.vue'
-import VotesLineChart from './components/VotesLineChart.vue'
+import ChartMaker from './components/ChartMaker.vue'
 import HelloWorld from './components/HelloWorld.vue'
-import BarChart from './components/BarChart.vue'
 //import PlanetChart from './components/PlanetChart.vue'
 
 export default {
@@ -83,9 +82,9 @@ export default {
   name: 'App',
   components: {
     VotesTable,
-    VotesLineChart,
-    HelloWorld,
-    BarChart
+    ChartMaker,
+    HelloWorld
+    
   
   },
   data() {
@@ -258,7 +257,7 @@ export default {
             this.open();          
         },
         voteslinechart(){
-            this.activeComponent = "VotesLineChart"
+            this.activeComponent = "ChartMaker"
             this.zoomC = '0.8'
            
             let data_sets = [];
