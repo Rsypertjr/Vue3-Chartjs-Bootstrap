@@ -32,6 +32,7 @@
             onMounted(() => {
                 hlitePage(1)
                 currentPage.value = 1
+                pageArrayIndex.value = 0
             })
 
             onUpdated(()=> {
@@ -127,8 +128,11 @@
                         currentPage.value = 1;
                         pageArrayIndex.value = 0;
                     }
-                    if(props.isClosed == true)
-                        currentPage.value = 1
+                    if(props.isClosed == true){
+                        pageArrayIndex.value = 0;
+                        currentPage.value = 1;
+                    }
+                        
                     
                     hlitePage(currentPage.value)
             });

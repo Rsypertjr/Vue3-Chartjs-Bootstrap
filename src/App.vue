@@ -39,7 +39,13 @@
                                 <span @click="votestable" class="nav-link">VotesTable</span>
                             </li>
                             <li class="nav-item">
-                                <span @click="voteslinechart" class="nav-link">Votes LineChart</span>
+                                <span @click="voteslinechart" class="nav-link align-middle">Total Votes<br/>Chart</span>
+                            </li>
+                            <li class="nav-item">
+                                <span @click="votesspikechart" class="nav-link  align-middle">Vote Spikes<br/>Chart</span>
+                            </li>
+                            <li class="nav-item">
+                                <span @click="votesgainloss" class="nav-link  align-middle">Incremental<br/>Diff Chart</span>
                             </li>
                             <li class="nav-item">
                                 <span @click="helloworld" class="nav-link">Hello World</span>
@@ -60,7 +66,7 @@
                     <button type="button" @click="close" class="btn btn-dark pager-btn">Close</button> 
                 </div>
                 <div class="row d-flex justify-content-center">
-                    <component  :is="activeComponent" :activeData="active_data" :isClosed="isClosed" @update-page-top="handleUpdatePageTop"></component> 
+                    <component  :is="activeComponent" :activeData="activeData" :rows="vote_rows" :isClosed="isClosed" :selectedindex="selectedindex" @update-page-top="handleUpdatePageTop"></component> 
                 </div>                               
             </div>
            
@@ -163,22 +169,13 @@ export default {
             activeData: [],
             showChart: false,
             zoomC: '0.9',
-            isClosed: false
+            isClosed: true,
+            theChart:null
         }
       },
   watch:{
-      selected: function(val){
-          this.parse_interval = parseInt(val.replace('Times','').trim())*10;
-      //    this.parse_vote();
-     //     this.linechart();
-     //     this.linechart2();
-     //     this.linechart3();
-     //     this.linechart4();
-      //    this.piechart();
-      //    this.stackedchart();
-      //    this.fill_votebins();
-     //     this.stackedchart2();
-          
+      selectedindex: function(val){
+          console.log("Selected Index changed: ", val)
           
       },
       number_pages: function(val){
@@ -198,6 +195,9 @@ export default {
                 case 'VotesLineChart':
                     this.voteslinechart();
                     break;
+                case 'VotesSpikesChart':
+                    this.votespikeschart();
+                    break;    
                 default:
                     break;
             }
@@ -258,11 +258,13 @@ export default {
         },
         voteslinechart(){
             this.activeComponent = "ChartMaker"
+            this.activeData = {}
             this.zoomC = '0.8'
+            this.isClosed = false
            
             let data_sets = [];
             let obj = {
-                data: Object.values(this.datedatatrump_store[this.selectedindex]),
+                data: this.datedatatrump_store,
                 label: "Trump Votes",
                 backgroundColor: "rgba(54,73,93,.5)",
                 borderColor: "#36495d",
@@ -270,7 +272,7 @@ export default {
             };
             data_sets.push(obj);
             obj = {
-                data : Object.values(this.datedatabiden_store[this.selectedindex]),
+                data : this.datedatabiden_store,
                 label : "Biden Votes",
                 backgroundColor : "rgba(71, 183,132,.5)",
                 borderColor : "#47b784",
@@ -278,13 +280,115 @@ export default {
             };
             data_sets.push(obj)
             obj = {
-                data: Object.values(this.datedataother_store[this.selectedindex]),
+                data: this.datedataother_store,
                 label: "Other Votes",
                 backgroundColor: "lightblue",
                 borderColor: "blue",
                 borderWidth: 3
             };
             data_sets.push(obj);
+            console.log("Data Sets: ", data_sets)
+            this.activeData = { 
+                
+                type: "line",
+                data: {
+                    labels: this.dateheaders_store,
+                    datasets: data_sets
+                },
+                options: {
+                    responsive: true,
+                    lineTension: 1,
+                    scales: {
+                            yAxis:{}
+                        }
+                }
+            }
+            if(this.selectedindex == 1)
+                this.open();
+        },
+        votesspikechart(){
+            this.activeComponent = "ChartMaker"
+            this.activeData = {}
+            this.zoomC = '0.8' 
+            this.isClosed = false
+           
+           
+            let data_sets = [];
+            let obj = {
+                data: this.datedatatrumpadd_store,
+                label: "Trump Spike",
+                backgroundColor: "rgba(54,73,93,.5)",
+                borderColor: "#36495d",
+                borderWidth: 3
+            };
+            data_sets.push(obj);
+            obj = {
+                data : this.datedatabidenadd_store,
+                label : "Biden Spike",
+                backgroundColor : "rgba(71, 183,132,.5)",
+                borderColor : "#47b784",
+                borderWidth : 3
+            };
+            data_sets.push(obj)
+            obj = {
+                data: this.datedataotheradd_store,
+                label: "Other Spike",
+                backgroundColor: "lightblue",
+                borderColor: "blue",
+                borderWidth: 3
+            };
+            data_sets.push(obj);
+            obj = {
+                data: this.datedatatotaladd_store,
+                label: "Total Spike",
+                backgroundColor: "pink",
+                borderColor: "red",
+                borderWidth: 3
+            };
+            data_sets.push(obj);
+            console.log("Data Sets: ", data_sets)
+            this.activeData = { 
+                
+                type: "line",
+                data: {
+                    labels: this.dateheaders_store,
+                    datasets: data_sets
+                },
+                options: {
+                    responsive: true,
+                    lineTension: 1,
+                    scales: {
+                            yAxis:{}
+                        }
+                }
+            }
+            if(this.selectedindex == 1)
+                this.open();
+        },
+        votesgainloss(){
+            this.activeComponent = "ChartMaker"
+            this.activeData = {}
+            this.zoomC = '0.8'
+            this.isClosed = false
+           
+            let data_sets = [];
+            let obj = {
+                data: Object.values(this.datedatatrumpadddiff_store[this.selectedindex]),
+                label: "Trump Gain/Loss",
+                backgroundColor: "rgba(54,73,93,.5)",
+                borderColor: "#36495d",
+                borderWidth: 3
+            };
+            data_sets.push(obj);
+            obj = {
+                data : Object.values(this.datedatabidenadddiff_store[this.selectedindex]),
+                label : "Biden Gain/Loss",
+                backgroundColor : "rgba(71, 183,132,.5)",
+                borderColor : "#47b784",
+                borderWidth : 3
+            };
+            data_sets.push(obj)
+           
             console.log("Data Sets: ", data_sets)
             this.activeData = { 
                 
@@ -327,6 +431,7 @@ export default {
 
        },    
        handleUpdatePageTop(pageNum){
+        console.log("goes up to parent")
         this.selectedindex = pageNum
         this.voteslinechart()
 
@@ -804,8 +909,9 @@ computed: {
             return this.vote_rows;
         },
         selected_index : function(){
-            console.log("New Selected Index:", this.selectedindex);
-            return this.selectedindex
+            let sindex = this.selectedindex;
+            console.log("New Selected Index:", sindex);
+            return sindex
         },
         active_data : function(){
             return this.activeData

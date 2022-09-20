@@ -35,7 +35,7 @@
 
     export default{
         props: {
-            activeData: Array
+            activeData: {}
         },
 
         setup(props){
@@ -96,13 +96,11 @@
                     let chk = (currentPage.value-1) % 10 == 0;
                     console.log("Check: ",chk)
                     if(chk){
-                        pageArrayIndex.value += 10  
-                        //currentPage.value++                   
+                        pageArrayIndex.value += 10           
                     }                    
                 }
                 else if(currentPage.value > pages.value.length) {
                    console.log("end condition...")
-                   //currentPage.value = pages.value.length - 1;
                 }
                 
             }
