@@ -373,7 +373,7 @@ export default {
            
             let data_sets = [];
             let obj = {
-                data: Object.values(this.datedatatrumpadddiff_store[this.selectedindex]),
+                data: this.datedatatrumpadddiff_store,
                 label: "Trump Gain/Loss",
                 backgroundColor: "rgba(54,73,93,.5)",
                 borderColor: "#36495d",
@@ -381,7 +381,7 @@ export default {
             };
             data_sets.push(obj);
             obj = {
-                data : Object.values(this.datedatabidenadddiff_store[this.selectedindex]),
+                data : this.datedatabidenadddiff_store,
                 label : "Biden Gain/Loss",
                 backgroundColor : "rgba(71, 183,132,.5)",
                 borderColor : "#47b784",
@@ -395,7 +395,7 @@ export default {
                 type: "line",
                 rows: this.vote_rows,
                 data: {
-                    labels: Object.values(this.dateheaders_store[this.selectedindex]),
+                    labels:this.dateheaders_store,
                     datasets: data_sets
                 },
                 options: {
