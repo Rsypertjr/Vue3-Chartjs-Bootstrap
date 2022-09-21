@@ -46,6 +46,7 @@
 
             onMounted(() => {
                 hlitePage(1)
+                console.log("In Votes Table: ",props.activeData)
             })
 
             onUpdated(()=> {

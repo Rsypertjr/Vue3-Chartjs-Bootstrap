@@ -42,14 +42,14 @@
                                 <span @click="voteslinechart" class="nav-link align-middle">Total Votes<br/>Chart</span>
                             </li>
                             <li class="nav-item">
-                                <span @click="votesspikechart" class="nav-link  align-middle">Vote Spikes<br/>Chart</span>
+                                <span @click="votesspikeschart" class="nav-link  align-middle">Vote Spikes<br/>Chart</span>
                             </li>
                             <li class="nav-item">
                                 <span @click="votesgainloss" class="nav-link  align-middle">Incremental<br/>Diff Chart</span>
                             </li>
                             <li class="nav-item">
-                                <span @click="helloworld" class="nav-link">Hello World</span>
-                            </li> 
+                                <span @click="perlinechart" class="nav-link  align-middle">% of Remaining<br/>Vote Chart</span>
+                            </li>
                             <!--li class="nav-item">
                                 <a class="nav-link" href="#/pricing">Pricing</a>
                             </li>
@@ -66,8 +66,10 @@
                     <button type="button" @click="close" class="btn btn-dark pager-btn">Close</button> 
                 </div>
                 <div class="row d-flex justify-content-center">
-                    <component  :is="activeComponent" :activeData="activeData" :rows="vote_rows" :isClosed="isClosed" :selectedindex="selectedindex" @update-page-top="handleUpdatePageTop"></component> 
-                </div>                               
+                    <component  :is="activeComponent" :activeData="activeData" :rows="vote_rows" 
+                    :isClosed="isClosed" :selectedindex="selectedindex" @update-page-top="handleUpdatePageTop"></component> 
+                </div>  
+                       
             </div>
            
         </div>
@@ -80,7 +82,7 @@ import $ from "jquery";
 import 'datatables.net-dt';
 import VotesTable from './components/VotesTable.vue'
 import ChartMaker from './components/ChartMaker.vue'
-import HelloWorld from './components/HelloWorld.vue'
+import CloseComponent from './components/CloseComponent.vue'
 //import PlanetChart from './components/PlanetChart.vue'
 
 export default {
@@ -89,7 +91,7 @@ export default {
   components: {
     VotesTable,
     ChartMaker,
-    HelloWorld
+    CloseComponent
     
   
   },
@@ -166,6 +168,7 @@ export default {
             step: 0,
             table:'',
             activeComponent:'',
+            chartType:'',
             activeData: [],
             showChart: false,
             zoomC: '0.9',
@@ -175,11 +178,32 @@ export default {
       },
   watch:{
       selectedindex: function(val){
-          console.log("Selected Index changed: ", val)
+          console.log("Selected Index changed: ", val)          
+          switch(this.chartType){ 
+                case 'VotesTable':
+                    this.votestable();
+                    break;             
+                case 'VotesLineChart':
+                    this.voteslinechart();
+                    break;
+                case 'VotesSpikesChart':
+                    this.votesspikeschart();
+                    break;   
+                case 'VotesGainLoss':
+                    this.votesgainloss();
+                    break; 
+                case 'PerLineChart':
+                    this.perlinechart();
+                    break;            
+                default:
+                    break;
+            }
+         
+            
           
       },
       number_pages: function(val){
-          console.log("Number of Pages: ", val);                               
+          //console.log("Number of Pages: ", val);                               
           this.parse_vote();
       },
       
@@ -188,16 +212,22 @@ export default {
           this.state = val;  
           this.close();       
           this.get_data(this.state).then(()=>{
-          switch(this.activeComponent){
+          switch(this.chartType){ 
                 case 'VotesTable':
                     this.votestable();
-                    break;
+                    break;             
                 case 'VotesLineChart':
                     this.voteslinechart();
                     break;
                 case 'VotesSpikesChart':
-                    this.votespikeschart();
-                    break;    
+                    this.votesspikeschart();
+                    break;   
+                case 'VotesGainLoss':
+                    this.votesgainloss();
+                    break; 
+                case 'PerLineChart':
+                    this.perlinechart();
+                    break;            
                 default:
                     break;
             }
@@ -221,7 +251,7 @@ export default {
   
   mounted() {
       
-    console.log("getting started")
+    //console.log("getting started")
     this.get_data(this.state).then( () => {
         this.parse_vote()
     });
@@ -234,7 +264,7 @@ export default {
       // Mapping Function Used for calculating when vote total decreases and the accumulation
         async get_data(state){                         
             let state_url='https://static01.nyt.com/elections-assets/2020/data/api/2020-11-03/race-page/'+ state.toLowerCase().replace(/-/,'') + '/president.json';
-            console.log(state_url)
+            //console.log(state_url)
             
             const res = await fetch(state_url)
             const jobj = await res.json()
@@ -249,6 +279,7 @@ export default {
           },
         votestable(){               
             this.activeComponent = "VotesTable"
+            this.chartType = "VotesTable"
             this.zoomC = '0.90';
             this.activeData = {
                 rows: this.vote_rows,
@@ -258,13 +289,15 @@ export default {
         },
         voteslinechart(){
             this.activeComponent = "ChartMaker"
+            this.chartType = "VotesLineChart"
             this.activeData = {}
             this.zoomC = '0.8'
             this.isClosed = false
+            //console.log("trump data store",Object.values(this.datedatatrump_store[this.selectedindex]))
            
-            let data_sets = [];
+            const data_sets = [];
             let obj = {
-                data: this.datedatatrump_store,
+                data: Object.values(this.datedatatrump_store[this.selectedindex]),
                 label: "Trump Votes",
                 backgroundColor: "rgba(54,73,93,.5)",
                 borderColor: "#36495d",
@@ -272,7 +305,7 @@ export default {
             };
             data_sets.push(obj);
             obj = {
-                data : this.datedatabiden_store,
+                data : Object.values(this.datedatabiden_store[this.selectedindex]),
                 label : "Biden Votes",
                 backgroundColor : "rgba(71, 183,132,.5)",
                 borderColor : "#47b784",
@@ -280,19 +313,19 @@ export default {
             };
             data_sets.push(obj)
             obj = {
-                data: this.datedataother_store,
+                data: Object.values(this.datedataother_store[this.selectedindex]),
                 label: "Other Votes",
                 backgroundColor: "lightblue",
                 borderColor: "blue",
                 borderWidth: 3
             };
             data_sets.push(obj);
-            console.log("Data Sets: ", data_sets)
+            //console.log("Votes Lines Data Sets: ", data_sets)
             this.activeData = { 
                 
                 type: "line",
                 data: {
-                    labels: this.dateheaders_store,
+                    labels: Object.values(this.dateheaders_store[this.selectedindex]),
                     datasets: data_sets
                 },
                 options: {
@@ -302,20 +335,21 @@ export default {
                             yAxis:{}
                         }
                 }
-            }
+            }      
             if(this.selectedindex == 1)
                 this.open();
         },
-        votesspikechart(){
-            this.activeComponent = "ChartMaker"
+        votesspikeschart(){
+            this.activeComponent = "ChartMaker" 
+            this.chartType = "VotesSpikesChart"
             this.activeData = {}
             this.zoomC = '0.8' 
             this.isClosed = false
            
            
-            let data_sets = [];
+            const data_sets = [];
             let obj = {
-                data: this.datedatatrumpadd_store,
+                data: Object.values(this.datedatatrumpadd_store[this.selectedindex]),
                 label: "Trump Spike",
                 backgroundColor: "rgba(54,73,93,.5)",
                 borderColor: "#36495d",
@@ -323,7 +357,7 @@ export default {
             };
             data_sets.push(obj);
             obj = {
-                data : this.datedatabidenadd_store,
+                data : Object.values(this.datedatabidenadd_store[this.selectedindex]),
                 label : "Biden Spike",
                 backgroundColor : "rgba(71, 183,132,.5)",
                 borderColor : "#47b784",
@@ -331,7 +365,7 @@ export default {
             };
             data_sets.push(obj)
             obj = {
-                data: this.datedataotheradd_store,
+                data: Object.values(this.datedataotheradd_store[this.selectedindex]),
                 label: "Other Spike",
                 backgroundColor: "lightblue",
                 borderColor: "blue",
@@ -339,19 +373,63 @@ export default {
             };
             data_sets.push(obj);
             obj = {
-                data: this.datedatatotaladd_store,
+                data: Object.values(this.datedatatotaladd_store[this.selectedindex]),
                 label: "Total Spike",
                 backgroundColor: "pink",
                 borderColor: "red",
                 borderWidth: 3
             };
             data_sets.push(obj);
-            console.log("Data Sets: ", data_sets)
+            //console.log("Votes Spikes Data Sets: ", data_sets)
             this.activeData = { 
                 
                 type: "line",
                 data: {
-                    labels: this.dateheaders_store,
+                    labels: this.dateheaders_store[this.selectedindex],
+                    datasets: data_sets
+                },
+                options: {
+                    responsive: true,
+                    lineTension: 1,
+                    scales: {
+                            yAxis:{}
+                        }
+                }
+            }          
+            if(this.selectedindex == 1)
+                this.open();
+        },
+        votesgainloss(){
+            this.activeComponent = "ChartMaker"
+            this.chartType = "VotesGainLoss"
+            this.activeData = {}
+            this.zoomC = '0.8'
+            this.isClosed = false
+           
+            let data_sets = [];
+            let obj = {
+                data: Object.values(this.datedatatrumpadddiff_store[this.selectedindex]),
+                label: "Trump Gain/Loss",
+                backgroundColor: "rgba(54,73,93,.5)",
+                borderColor: "#36495d",
+                borderWidth: 3
+            };
+            data_sets.push(obj);
+            obj = {
+                data : Object.values(this.datedatabidenadddiff_store[this.selectedindex]),
+                label : "Biden Gain/Loss",
+                backgroundColor : "rgba(71, 183,132,.5)",
+                borderColor : "#47b784",
+                borderWidth : 3
+            };
+            data_sets.push(obj)
+           
+            //console.log("Data Sets: ", data_sets)
+            this.activeData = { 
+                
+                type: "line",
+                data: {
+                    labels:this.dateheaders_store[this.selectedindex],
                     datasets: data_sets
                 },
                 options: {
@@ -365,37 +443,37 @@ export default {
             if(this.selectedindex == 1)
                 this.open();
         },
-        votesgainloss(){
+        perlinechart(){
             this.activeComponent = "ChartMaker"
+            this.chartType = "PerLineChart"
             this.activeData = {}
             this.zoomC = '0.8'
             this.isClosed = false
            
             let data_sets = [];
             let obj = {
-                data: this.datedatatrumpadddiff_store,
-                label: "Trump Gain/Loss",
+                data: Object.values(this.perremainingtrump_store[this.selectedindex]),
+                label: "Trump % of Remaining Vote",
                 backgroundColor: "rgba(54,73,93,.5)",
                 borderColor: "#36495d",
                 borderWidth: 3
             };
             data_sets.push(obj);
             obj = {
-                data : this.datedatabidenadddiff_store,
-                label : "Biden Gain/Loss",
+                data : Object.values(this.perremainingbiden_store[this.selectedindex]),
+                label : "Biden % of Remaining Vote",
                 backgroundColor : "rgba(71, 183,132,.5)",
                 borderColor : "#47b784",
                 borderWidth : 3
             };
             data_sets.push(obj)
            
-            console.log("Data Sets: ", data_sets)
+            //console.log("Data Sets: ", data_sets)
             this.activeData = { 
                 
                 type: "line",
-                rows: this.vote_rows,
                 data: {
-                    labels:this.dateheaders_store,
+                    labels:this.dateheaders_store[this.selectedindex],
                     datasets: data_sets
                 },
                 options: {
@@ -417,29 +495,34 @@ export default {
             this.open();
        },
        open(){
-           window.scrollBy(0,500)
-            $('#dyn_component').animate({marginTop:'-15em',opacity:'0.8'},{duration:"slow"}, {easing:"easein"}).css('transform','scale('+this.zoomC+')');
+            window.scrollBy(0,500)
+            this.selectedindex = 1
+            $('#dyn_component').animate({marginTop:'-15em',opacity:'0.8'},{duration:"fast"}, {easing:"easein"}).css('transform','scale('+this.zoomC+')');
             this.zoomC = '1.0',
             this.isClosed = false;
            
        },
        close(){
-            $('#dyn_component').animate({marginTop:'0em',opacity:'0'},{duration:"fast"}, {easing:"easein"});
             this.zoomC = '1.0' 
             this.isClosed = true;
-            this.selectedindex = 1;
+            this.activeComponent = "";
+           
+            $('#dyn_component').animate({marginTop:'0em',opacity:'0'},{duration:"fast"}, {easing:"easein"},function(){
+                this.selectedindex = 1;
+            });
+            
+           
 
        },    
        handleUpdatePageTop(pageNum){
-        console.log("goes up to parent")
-        this.selectedindex = pageNum
-        this.voteslinechart()
+            //console.log("goes up to parent")
+            this.selectedindex = pageNum
 
        }, 
        parse_data() {
             //console.log("Selected Sort:",selected_sort)
-            console.log("Race Data:", this.race_info);
-            console.log("Timeseries: ",this.timeseries);
+            //console.log("Race Data:", this.race_info);
+           // console.log("Timeseries: ",this.timeseries);
 
             // Parse Votes for Master Table
             function calc_votes(votes,index){
@@ -514,13 +597,13 @@ export default {
                 }
                 return votes;
               });
-            console.log("Total Votes:",pres_votes);
+              //console.log("Total Votes:",pres_votes);
         
             let totalnum_votes = pres_votes[pres_votes.length-1].votes;
-            console.log("Total Num of Votes: ",totalnum_votes);
+            //console.log("Total Num of Votes: ",totalnum_votes);
             let temp_rows = [];
-//          if(selected_sort && selected_sort.includes('Time')) {
-        //       console.log("Sort Selected: ",selected_sort);
+            //if(selected_sort && selected_sort.includes('Time')) {
+            //  console.log("Sort Selected: ",selected_sort);
                 temp_rows = pres_votes.map(function(vote){                            
                     //return {"votes":vote.votes,"timestamp":vote.timestamp,"bidenj":vote.bidenj,"trumpd":vote.trumpd};
                     vote.percent_of_remaining_trump = vote.total_vote_add_trump*100/(totalnum_votes-vote.votes);
@@ -540,7 +623,7 @@ export default {
               }
 
               */
-              console.log("Total Votes Again:",temp_rows);
+              //console.log("Total Votes Again:",temp_rows);
               
               this.vote_rows = temp_rows.map(function(vote,index){
                   return {
@@ -559,7 +642,7 @@ export default {
                     remaining_percent_biden:vote.percent_of_remaining_biden
                     };
                 });
-                console.log("Vote Rows:", this.vote_rows);
+                //console.log("Vote Rows:", this.vote_rows);
                 // $('#results_table').show();
                 //  if(this2.table)
                 //  this2.table.destroy();
@@ -652,7 +735,7 @@ export default {
               this.perremainingbiden_store = [];
 
 
-              console.log("Parse Interval",this.parse_interval);
+              //console.log("Parse Interval",this.parse_interval);
               for(i=0;i<this.vote_rows.length;i++){
                   if(i == 0){
                       dateheaders.push(this.vote_rows[i].timestamp);
@@ -748,9 +831,9 @@ export default {
 
               }
           
-              console.log("Date Total Add: ", this.datedatatotaladd_store);
-              console.log("Date Biden Add Diff: ", this.datedatabidenadddiff_store);
-              console.log("Date Trump Add Diff: ", this.datedatatrumpadddiff_store);
+              //console.log("Date Total Add: ", this.datedatatotaladd_store);
+              //console.log("Date Biden Add Diff: ", this.datedatabidenadddiff_store);
+              //console.log("Date Trump Add Diff: ", this.datedatatrumpadddiff_store);
 
               // PieChart calculations
               var totalslices = [];
@@ -790,7 +873,7 @@ export default {
           this.total_slices = totalslices;
           this.pie_headers = pieheaders;
 
-          console.log("Other Slices: ",otherslices);
+          //console.log("Other Slices: ",otherslices);
 
 
 
@@ -809,11 +892,11 @@ export default {
           };
         
           this.number_pages = Math.ceil(this.vote_rows.length/this.pageSize)  
-          console.log("Number of Pages: ",this.number_pages)
+          //console.log("Number of Pages: ",this.number_pages)
           let step = parseInt(200000/(this.number_pages*10));
           //let step = 2500;
           
-          console.log("Step",step);
+          //console.log("Step",step);
 
           while(interval <= 200000){
               vote_bin.interval = interval;
@@ -857,7 +940,7 @@ export default {
                   }
               }            
           }
-          console.log("Vote Bins: ",this.vote_bins);
+          //console.log("Vote Bins: ",this.vote_bins);
 
           this.bin_headers = [];
           this.bin_biden = [];
@@ -905,12 +988,12 @@ export default {
 
 computed: {
         pres_vote_rows :  function(){                            
-            console.log("New Vote Rows:", this.vote_rows);                              
+            //console.log("New Vote Rows:", this.vote_rows);                              
             return this.vote_rows;
         },
         selected_index : function(){
             let sindex = this.selectedindex;
-            console.log("New Selected Index:", sindex);
+            //console.log("New Selected Index:", sindex);
             return sindex
         },
         active_data : function(){
