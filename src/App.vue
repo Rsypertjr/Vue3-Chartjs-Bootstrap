@@ -50,6 +50,9 @@
                             <li class="nav-item">
                                 <span @click="perlinechart" class="nav-link  align-middle">% of Remaining<br/>Vote Chart</span>
                             </li>
+                            <li class="nav-item">
+                                <span @click="totalvotespiechart" class="nav-link  align-middle">Total Votes<br/>Pie Chart</span>
+                            </li>
                             <!--li class="nav-item">
                                 <a class="nav-link" href="#/pricing">Pricing</a>
                             </li>
@@ -62,7 +65,7 @@
             </div>
             <!-- Dynamic Component Selection ---->
             <div id="dyn_component" class="container-fluid">
-                <div class="row d-flex justify-content-start p-4">
+                <div class="row d-flex justify-content-start p-4" :class="{'bClose' : this.activeData.type == 'pie'}">
                     <button type="button" @click="close" class="btn btn-dark pager-btn">Close</button> 
                 </div>
                 <div class="row d-flex justify-content-center">
@@ -172,14 +175,18 @@ export default {
             activeData: [],
             showChart: false,
             zoomC: '0.9',
+            mTop:'-15em',
+            fSize:'1em',
             isClosed: true,
             theChart:null
         }
       },
   watch:{
+    
       selectedindex: function(val){
-          console.log("Selected Index changed: ", val)          
-          switch(this.chartType){ 
+          console.log("Selected Index changed: ", val)  
+            if(!this.isClosed){
+                switch(this.chartType){ 
                 case 'VotesTable':
                     this.votestable();
                     break;             
@@ -194,14 +201,19 @@ export default {
                     break; 
                 case 'PerLineChart':
                     this.perlinechart();
-                    break;            
+                    break;  
+                case 'TotalVotesPieChart':
+                    this.totalvotespiechart();
+                    break;                 
                 default:
                     break;
             }
-         
+        }
+          
+      
             
           
-      },
+      },   
       number_pages: function(val){
           //console.log("Number of Pages: ", val);                               
           this.parse_vote();
@@ -227,7 +239,10 @@ export default {
                     break; 
                 case 'PerLineChart':
                     this.perlinechart();
-                    break;            
+                    break;  
+                case 'TotalVotesPieChart':
+                    this.totalvotespiechart();
+                    break;                 
                 default:
                     break;
             }
@@ -487,6 +502,82 @@ export default {
             if(this.selectedindex == 1)
                 this.open();
         },
+
+        totalvotespiechart(){
+            this.activeComponent = "ChartMaker"
+            this.chartType = "TotalVotesPieChart"
+            this.activeData = {}
+            this.zoomC = '0.5'
+            this.mTop = '-31em'
+            //this.fSize = '1.5em'
+            this.isClosed = false
+            console.log("Entering Total Votes Pie Chart.....")
+            console.log("Trump Slices", this.trump_slices)
+           
+            let data_sets = [];
+            let obj = {
+                data: [this.trump_slices[this.selectedindex], this.biden_slices[this.selectedindex],this.other_slices[this.selectedindex]],
+                label: "Total Votes",
+                backgroundColor: [
+                                    "rgba(167,105,0,0.4)",
+                                    "red",
+                                    "rgba(86,105,0,0.4)"
+                                ],
+                                borderColor:[
+                                    "rgb(167, 105, 0)",
+                                    "red",
+                                    "rgb(86, 105, 0)"
+                                ]
+            };
+            data_sets.push(obj);
+           
+            console.log("Data Sets: ", data_sets)
+            this.activeData = { 
+                
+                type: "pie",
+                
+                data: {
+                    labels: ["Trump Votes","Biden Votes","Other Votes"],
+                    datasets: data_sets
+                },
+                options: {
+                    responsive: true,
+                    lineTension: 1,
+                    hoverBorderWidth: 2,
+                    scales: {
+                        x: {
+                                ticks: {
+                                    font: {
+                                        size: 40,
+                                    }
+                                }
+                            },
+                        y: {
+                            ticks: {
+                                font: {
+                                    size: 40,
+                                }
+                            }
+                        },
+                    },
+                       
+                    plugins: {
+                        legend: {
+                            labels: {
+                                // This more specific font property overrides the global property
+                                font: {
+                                    size: 40
+                                }
+                            }
+                        }
+                        }    
+                }
+            }
+            if(this.selectedindex == 1)
+                this.open();
+        },
+
+
        helloworld(){
             this.activeComponent = "HelloWorld"
             this.activeData = {
@@ -497,20 +588,22 @@ export default {
        open(){
             window.scrollBy(0,500)
             this.selectedindex = 1
-            $('#dyn_component').animate({marginTop:'-15em',opacity:'0.8'},{duration:"fast"}, {easing:"easein"}).css('transform','scale('+this.zoomC+')');
+            $('#dyn_component').animate({marginTop:this.mTop,opacity:'0.8'},{duration:"fast"}, {easing:"easein"})
+            .css('font-size',this.fSize).css('transform','scale('+this.zoomC+')');
             this.zoomC = '1.0',
             this.isClosed = false;
+            this.mTop = '-15em';
+            this.fSize = '1em'
            
        },
        close(){
             this.zoomC = '1.0' 
             this.isClosed = true;
             this.activeComponent = "";
+            this.mTop = '-15em'
            
-            $('#dyn_component').animate({marginTop:'0em',opacity:'0'},{duration:"fast"}, {easing:"easein"},function(){
-                this.selectedindex = 1;
-            });
-            
+            $('#dyn_component').animate({marginTop:'0em',opacity:'0'},{duration:"fast"}, {easing:"easein"});
+            this.selectedindex = 1;
            
 
        },    
@@ -1083,6 +1176,8 @@ computed: {
     position:relative;
     margin-top:0em;
     z-index:200;
+    width: 100%;
+    display: inline-block;
     background-color:beige;
     opacity:0;
     -webkit-transition: all 1s linear;
@@ -1090,5 +1185,8 @@ computed: {
     -o-transition: all 1s linear;
     transition: all 1s linear;
     overflow:hidden;
+  }
+  .bClose {
+    transform: scale(1.5)
   }
 </style>

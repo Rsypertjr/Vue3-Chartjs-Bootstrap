@@ -1,5 +1,5 @@
 <template>
-    <div class="row d-flex justify-content-center">
+    <div class="row d-flex justify-content-center" :class="{'bar-chart': isPie }">
             <div class="d-flex justify-content-center">
                 <button type="button" @click="previous" class="btn btn-light pager-btn">Previous</button>   
                 <div  v-for="pg in pageArray.keys()"  :key="pg"  class="pager-btn"  >
@@ -20,7 +20,8 @@
 
         props: {
             rows: Array,
-            isClosed: Boolean
+            isClosed: Boolean,
+            type: String
         },
 
         setup(props,context){
@@ -28,11 +29,14 @@
             let currentPage = ref(1);
             let pageArrayIndex = ref(0);
             let showPager = ref(true);
+            let isPie = ref(true);
 
             onMounted(() => {
+                console.log("type in Pager: ", props.type)
                 hlitePage(1)
                 currentPage.value = 1
                 pageArrayIndex.value = 0
+                isPie.value = props.type == 'pie'
             })
 
             onUpdated(()=> {
@@ -148,9 +152,16 @@
                 showPage,
                 hlitePage,
                 next,
-                previous
+                previous,
+                isPie
             }
         },
 
     };
 </script>
+<style>
+    .bar-chart{
+       transform: scale(1.5);
+       margin-bottom: 1em;
+    }
+</style>

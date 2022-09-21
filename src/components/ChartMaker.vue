@@ -1,7 +1,7 @@
 <template>
   <div>
     <canvas id="chart"></canvas>     
-    <ChartPager :rows="rows" :isClosed="isClosed" @update-page="handleUpdatePage"/>  
+    <ChartPager :rows="rows" :isClosed="isClosed" :type="type" @update-page="handleUpdatePage"/>  
   </div>
 </template>
 
@@ -10,7 +10,7 @@
   import { tSNonNullExpression } from '@babel/types';
   import { Chart, registerables } from 'chart.js'
   Chart.register(...registerables);
-  import { onMounted, onUpdated, onUnmounted,  ref, watchEffect, watch  } from 'vue'
+  import { onMounted, onUpdated, onUnmounted, onBeforeMount,  ref, watchEffect, watch  } from 'vue'
   import ChartPager from './ChartPager.vue'
   var ctx = null
   var theChart = null
@@ -34,7 +34,9 @@
         const idx = ref(props.selectedindex)
         const acData = ref(props.activeData)
         const acDataStore = ref({})
+        let type = ref('')
 
+        /*
 
         watch(idx, (currentValue, oldValue) => {
           console.log("new index: ",currentValue);
@@ -48,16 +50,22 @@
           console.log("old active data: ", oldValue);
         });
 
+        */
+        onBeforeMount(() => {
+          type.value = props.activeData.type
+        })
 
         onMounted(() => {     
               
              
-              //console.log("Active Data in Mounted",props.activeData)
+              console.log("Active Data in Mounted",props.activeData)
               //console.log("selected index",props.selectedindex)
              // console.log("the Chart in Mounted", theChart)
-              
+                //if(props.activeData.type == 'bar')
+                  // Chart.defaults.font.size = 25;
                 let ctx = document.getElementById('chart')
                 theChart = new Chart(ctx, props.activeData)
+              
              
         })
 
@@ -133,7 +141,8 @@
             idx,
             pdata,
             acData,
-            acDataStore
+            acDataStore,
+            type
           }
 
       },
