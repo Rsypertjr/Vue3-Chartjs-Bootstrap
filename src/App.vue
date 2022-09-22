@@ -39,19 +39,25 @@
                                 <span @click="votestable" class="nav-link">VotesTable</span>
                             </li>
                             <li class="nav-item">
-                                <span @click="voteslinechart" class="nav-link align-middle">Total Votes<br/>Chart</span>
+                                <span @click="voteslinechart" class="nav-link align-middle">Votes<br/>Line Chart</span>
                             </li>
                             <li class="nav-item">
-                                <span @click="votesspikeschart" class="nav-link  align-middle">Vote Spikes<br/>Chart</span>
+                                <span @click="votesspikeschart" class="nav-link  align-middle">Spikes<br/>Line Chart</span>
                             </li>
                             <li class="nav-item">
-                                <span @click="votesgainloss" class="nav-link  align-middle">Incremental<br/>Diff Chart</span>
+                                <span @click="votesgainloss" class="nav-link  align-middle">Difference<br/>Line Chart</span>
                             </li>
                             <li class="nav-item">
-                                <span @click="perlinechart" class="nav-link  align-middle">% of Remaining<br/>Vote Chart</span>
+                                <span @click="perlinechart" class="nav-link  align-middle">% Remaining Votes<br/>Line Chart</span>
                             </li>
                             <li class="nav-item">
-                                <span @click="totalvotespiechart" class="nav-link  align-middle">Total Votes<br/>Pie Chart</span>
+                                <span @click="totalvotespiechart" class="nav-link  align-middle">Votes<br/>Pie Chart</span>
+                            </li>
+                            <li class="nav-item">
+                                <span @click="stackedbarchart" class="nav-link  align-middle">Votes<br/>Stacked Bar Chart</span>
+                            </li>
+                            <li class="nav-item">
+                                <span @click="votesbarchart" class="nav-link  align-middle">Votes<br/>Bar Chart</span>
                             </li>
                             <!--li class="nav-item">
                                 <a class="nav-link" href="#/pricing">Pricing</a>
@@ -68,7 +74,9 @@
                 <div class="row d-flex justify-content-start p-4" :class="{'bClose' : this.activeData.type == 'pie'}">
                     <button type="button" @click="close" class="btn btn-dark pager-btn">Close</button> 
                 </div>
-                <div class="row d-flex justify-content-center">
+               
+                <div v-if="isClosed == true" class="loader"></div> 
+                <div v-else class="row d-flex justify-content-center">                    
                     <component  :is="activeComponent" :activeData="activeData" :rows="vote_rows" 
                     :isClosed="isClosed" :selectedindex="selectedindex" @update-page-top="handleUpdatePageTop"></component> 
                 </div>  
@@ -187,27 +195,33 @@ export default {
           console.log("Selected Index changed: ", val)  
             if(!this.isClosed){
                 switch(this.chartType){ 
-                case 'VotesTable':
-                    this.votestable();
-                    break;             
-                case 'VotesLineChart':
-                    this.voteslinechart();
-                    break;
-                case 'VotesSpikesChart':
-                    this.votesspikeschart();
-                    break;   
-                case 'VotesGainLoss':
-                    this.votesgainloss();
-                    break; 
-                case 'PerLineChart':
-                    this.perlinechart();
-                    break;  
-                case 'TotalVotesPieChart':
-                    this.totalvotespiechart();
-                    break;                 
-                default:
-                    break;
-            }
+                    case 'VotesTable':
+                        this.votestable();
+                        break;             
+                    case 'VotesLineChart':
+                        this.voteslinechart();
+                        break;
+                    case 'VotesSpikesChart':
+                        this.votesspikeschart();
+                        break;   
+                    case 'VotesGainLoss':
+                        this.votesgainloss();
+                        break; 
+                    case 'PerLineChart':
+                        this.perlinechart();
+                        break;  
+                    case 'TotalVotesPieChart':
+                        this.totalvotespiechart();
+                        break;  
+                    case 'StackedBarChart':
+                        this.stackedbarchart();
+                        break;  
+                    case 'VotesBarChart':
+                        this.votesbarchart();
+                        break;                  
+                    default:
+                        break;
+                    }
         }
           
       
@@ -221,10 +235,14 @@ export default {
       
       state : function(val){
           //$("#results_table").css("display","none");
-          this.state = val;  
-          this.close();       
+          this.activeComponent = ''
+          //this.close(); 
+          this.isClosed = true      
           this.get_data(this.state).then(()=>{
-          switch(this.chartType){ 
+            console.log("Selected State changed: ", val);  
+            this.isClosed = false
+            this.selectedindex = 1;
+            switch(this.chartType){ 
                 case 'VotesTable':
                     this.votestable();
                     break;             
@@ -242,7 +260,13 @@ export default {
                     break;  
                 case 'TotalVotesPieChart':
                     this.totalvotespiechart();
-                    break;                 
+                    break;  
+                case 'StackedBarChart':
+                    this.stackedbarchart();
+                    break;    
+                case 'VotesBarChart':
+                    this.votesbarchart();
+                    break;                      
                 default:
                     break;
             }
@@ -269,6 +293,7 @@ export default {
     //console.log("getting started")
     this.get_data(this.state).then( () => {
         this.parse_vote()
+        this.isClosed = true
     });
   },
   updated(){
@@ -278,7 +303,7 @@ export default {
   methods: {
       // Mapping Function Used for calculating when vote total decreases and the accumulation
         async get_data(state){                         
-            let state_url='https://static01.nyt.com/elections-assets/2020/data/api/2020-11-03/race-page/'+ state.toLowerCase().replace(/-/,'') + '/president.json';
+            let state_url='https://static01.nyt.com/elections-assets/2020/data/api/2020-11-03/race-page/'+ state.toLowerCase().replace(/\s/,'-') + '/president.json';
             //console.log(state_url)
             
             const res = await fetch(state_url)
@@ -303,11 +328,12 @@ export default {
             this.open();          
         },
         voteslinechart(){
+            this.isClosed = false
             this.activeComponent = "ChartMaker"
             this.chartType = "VotesLineChart"
             this.activeData = {}
             this.zoomC = '0.8'
-            this.isClosed = false
+           
             //console.log("trump data store",Object.values(this.datedatatrump_store[this.selectedindex]))
            
             const data_sets = [];
@@ -355,11 +381,12 @@ export default {
                 this.open();
         },
         votesspikeschart(){
+            this.isClosed = false
             this.activeComponent = "ChartMaker" 
             this.chartType = "VotesSpikesChart"
             this.activeData = {}
             this.zoomC = '0.8' 
-            this.isClosed = false
+            
            
            
             const data_sets = [];
@@ -415,11 +442,12 @@ export default {
                 this.open();
         },
         votesgainloss(){
+            this.isClosed = false
             this.activeComponent = "ChartMaker"
             this.chartType = "VotesGainLoss"
             this.activeData = {}
             this.zoomC = '0.8'
-            this.isClosed = false
+            
            
             let data_sets = [];
             let obj = {
@@ -459,11 +487,11 @@ export default {
                 this.open();
         },
         perlinechart(){
+            this.isClosed = false           
             this.activeComponent = "ChartMaker"
             this.chartType = "PerLineChart"
             this.activeData = {}
             this.zoomC = '0.8'
-            this.isClosed = false
            
             let data_sets = [];
             let obj = {
@@ -504,13 +532,14 @@ export default {
         },
 
         totalvotespiechart(){
+            this.isClosed = false
             this.activeComponent = "ChartMaker"
             this.chartType = "TotalVotesPieChart"
             this.activeData = {}
             this.zoomC = '0.5'
             this.mTop = '-31em'
             //this.fSize = '1.5em'
-            this.isClosed = false
+            
             console.log("Entering Total Votes Pie Chart.....")
             console.log("Trump Slices", this.trump_slices)
            
@@ -577,6 +606,227 @@ export default {
                 this.open();
         },
 
+
+        stackedbarchart(){
+            this.isClosed = false
+            this.activeComponent = "ChartMaker"
+            this.chartType = "StackedBarChart"
+            this.activeData = {}
+            this.zoomC = '0.8'
+           // this.mTop = '-31em'
+            //this.fSize = '1.5em'
+            this.isClosed = false
+            console.log("Entering Total Votes Stacked Bar Chart.....")
+            console.log("Date Data Trump", this.datedatatrump_store)
+            /*
+            window.chartColors = {
+                red: 'rgb(255, 99, 132)',
+                orange: 'rgb(255, 159, 64)',
+                yellow: 'rgb(255, 205, 86)',
+                green: 'rgb(75, 192, 192)',
+                blue: 'rgb(54, 162, 235)',
+                purple: 'rgb(153, 102, 255)',
+                grey: 'rgb(231,233,237)'
+                };
+                */
+
+            
+            let data_sets = [];
+            let obj = {
+                data: Object.values(this.datedatatrump_store[this.selectedindex]),
+                type: 'bar',
+                label: 'Trump Votes',
+                backgroundColor: "rgba(167,105,0,0.4)",
+                borderColor: "rgb(167, 105, 0)",
+                borderWidth: 2,
+            };
+            data_sets.push(obj);
+
+            obj = {
+                data: Object.values(this.datedatabiden_store[this.selectedindex]),
+                label: "Biden Votes",
+                type: 'bar',
+                backgroundColor: "pink",
+                borderColor: "red",
+                borderWidth: 2,
+            };
+            data_sets.push(obj);
+
+            obj = {
+                data: Object.values(this.datedataother_store[this.selectedindex]),
+                type: 'bar',
+                label: 'Other Votes',
+                backgroundColor: "rgba(86,105,0,0.4)",
+                borderColor:"rgb(86, 105, 0)",
+                borderWidth: 2,
+            };
+            data_sets.push(obj); 
+           
+            console.log("Data Sets: ", data_sets)
+            this.activeData = { 
+                
+                type: "bar",
+                
+                data: {
+                    labels: Object.values(this.dateheaders_store[this.selectedindex]),
+                    datasets: data_sets
+                },
+                options: {
+                    responsive: true,
+                    lineTension: 1,
+                    hoverBorderWidth: 2,
+                    title: {
+                            display: true,
+                            text: 'Vote Totals Per Time Interval'
+                        },
+                    tooltips: {
+                        mode: 'index',
+                        intersect: true
+                    },
+                    scales: {
+                        x: {
+                                ticks: {
+                                    font: {
+                                        size: 20,
+                                    }
+                                },
+                                stacked: true
+                            },
+                        y: {
+                            ticks: {
+                                font: {
+                                    size: 20,
+                                }
+                            },
+                            stacked: true
+                        },
+                    },
+                       
+                    plugins: {
+                        legend: {
+                            labels: {
+                                // This more specific font property overrides the global property
+                                font: {
+                                    size: 20
+                                }
+                            }
+                        }
+                        }    
+                }
+            }
+            if(this.selectedindex == 1)
+                this.open();
+        },
+
+
+        votesbarchart(){
+            this.isClosed = false
+            this.activeComponent = "ChartMaker"
+            this.chartType = "VotesBarChart"
+            this.activeData = {}
+            this.zoomC = '0.8'
+           // this.mTop = '-31em'
+            //this.fSize = '1.5em'
+            this.isClosed = false
+            console.log("Entering Total Votes Stacked Bar Chart.....")
+            console.log("Date Data Trump", this.datedatatrump_store)
+            /*
+            window.chartColors = {
+                red: 'rgb(255, 99, 132)',
+                orange: 'rgb(255, 159, 64)',
+                yellow: 'rgb(255, 205, 86)',
+                green: 'rgb(75, 192, 192)',
+                blue: 'rgb(54, 162, 235)',
+                purple: 'rgb(153, 102, 255)',
+                grey: 'rgb(231,233,237)'
+                };
+                */
+
+            
+            let data_sets = [];
+            let obj = {
+                data: Object.values(this.datedatatrump_store[this.selectedindex]),
+                type: 'bar',
+                label: 'Trump Votes',
+                backgroundColor: "rgba(167,105,0,0.4)",
+                borderColor: "rgb(167, 105, 0)",
+                borderWidth: 2,
+            };
+            data_sets.push(obj);
+
+            obj = {
+                data: Object.values(this.datedatabiden_store[this.selectedindex]),
+                label: "Biden Votes",
+                type: 'bar',
+                backgroundColor: "pink",
+                borderColor: "red",
+                borderWidth: 2,
+            };
+            data_sets.push(obj);
+
+            obj = {
+                data: Object.values(this.datedataother_store[this.selectedindex]),
+                type: 'bar',
+                label: 'Other Votes',
+                backgroundColor: "rgba(86,105,0,0.4)",
+                borderColor:"rgb(86, 105, 0)",
+                borderWidth: 2,
+            };
+            data_sets.push(obj); 
+           
+            console.log("Data Sets: ", data_sets)
+            this.activeData = { 
+                
+                type: "bar",
+                
+                data: {
+                    labels: Object.values(this.dateheaders_store[this.selectedindex]),
+                    datasets: data_sets
+                },
+                options: {
+                    responsive: true,
+                    lineTension: 1,
+                    hoverBorderWidth: 2,
+                    title: {
+                            display: true,
+                            text: 'Vote Totals Per Time Interval'
+                        },
+                    tooltips: {
+                        mode: 'index',
+                        intersect: true
+                    },
+                    scales: {
+                        x: {
+                                ticks: {
+                                    font: {
+                                        size: 20,
+                                    }
+                                }
+                            },
+                        y: {
+                            ticks: {
+                                font: {
+                                    size: 20,
+                                }
+                            }
+                        },
+                    },
+                       
+                    plugins: {
+                        legend: {
+                            labels: {
+                                // This more specific font property overrides the global property
+                                font: {
+                                    size: 20
+                                }
+                            }
+                        }
+                        }    
+                }
+            }
+            if(this.selectedindex == 1)
+                this.open();
+        },
 
        helloworld(){
             this.activeComponent = "HelloWorld"
