@@ -29,34 +29,34 @@
         <div v-else class="container">  
             <div class="mb-5">        
                 <nav class="navbar navbar-expand-lg navbar-dark bg-dark p-2">
-                    <a class="navbar-brand" href="#">Navbar</a>
+                    <a class="navbar-brand m-3" @click="reset" href="#">Navbar</a>
                     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
                     <div class="collapse navbar-collapse" id="navbarNav">
                         <ul class="navbar-nav">
-                            <li class="nav-item active">
-                                <span @click="votestable" class="nav-link">VotesTable</span>
+                            <li class="nav-item m-3 active">
+                                <span @click="votestable" class="nav-link">Votes<br/>Table</span>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item m-3">
                                 <span @click="voteslinechart" class="nav-link align-middle">Votes<br/>Line Chart</span>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item m-3">
                                 <span @click="votesspikeschart" class="nav-link  align-middle">Spikes<br/>Line Chart</span>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item m-3">
                                 <span @click="votesgainloss" class="nav-link  align-middle">Difference<br/>Line Chart</span>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item m-3">
                                 <span @click="perlinechart" class="nav-link  align-middle">% Remaining Votes<br/>Line Chart</span>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item m-3">
                                 <span @click="totalvotespiechart" class="nav-link  align-middle">Votes<br/>Pie Chart</span>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item m-3">
                                 <span @click="stackedbarchart" class="nav-link  align-middle">Votes<br/>Stacked Bar Chart</span>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item m-3">
                                 <span @click="votesbarchart" class="nav-link  align-middle">Votes<br/>Bar Chart</span>
                             </li>
                             <!--li class="nav-item">
@@ -129,7 +129,7 @@ export default {
             timeseries: {},
             vote_rows: [],
             race_info: {},
-            selectedindex: 1,
+            selectedindex: 0,
             trump_votes_decrease: [],
             biden_votes_decrease: [],
             total_biden_increase: 0,
@@ -238,10 +238,11 @@ export default {
           this.activeComponent = ''
           //this.close(); 
           this.isClosed = true      
+          console.log("Selected State changed: ", val);  
           this.get_data(this.state).then(()=>{
-            console.log("Selected State changed: ", val);  
+            
             this.isClosed = false
-            this.selectedindex = 1;
+            this.selectedindex = 0;
             switch(this.chartType){ 
                 case 'VotesTable':
                     this.votestable();
@@ -317,6 +318,10 @@ export default {
                 };
             this.parse_data()
           },
+
+        reset(){
+            location.reload()
+        },
         votestable(){               
             this.activeComponent = "VotesTable"
             this.chartType = "VotesTable"
@@ -363,7 +368,7 @@ export default {
             data_sets.push(obj);
             //console.log("Votes Lines Data Sets: ", data_sets)
             this.activeData = { 
-                
+                title: "Votes Totals",
                 type: "line",
                 data: {
                     labels: Object.values(this.dateheaders_store[this.selectedindex]),
@@ -371,13 +376,13 @@ export default {
                 },
                 options: {
                     responsive: true,
-                    lineTension: 1,
+                    //lineTension: 1,
                     scales: {
                             yAxis:{}
                         }
                 }
             }      
-            if(this.selectedindex == 1)
+            if(this.selectedindex == 0)
                 this.open();
         },
         votesspikeschart(){
@@ -424,7 +429,7 @@ export default {
             data_sets.push(obj);
             //console.log("Votes Spikes Data Sets: ", data_sets)
             this.activeData = { 
-                
+                title: "Vote Spikes",
                 type: "line",
                 data: {
                     labels: this.dateheaders_store[this.selectedindex],
@@ -432,13 +437,13 @@ export default {
                 },
                 options: {
                     responsive: true,
-                    lineTension: 1,
+                    //lineTension: 1,
                     scales: {
                             yAxis:{}
                         }
                 }
             }          
-            if(this.selectedindex == 1)
+            if(this.selectedindex == 0)
                 this.open();
         },
         votesgainloss(){
@@ -469,7 +474,7 @@ export default {
            
             //console.log("Data Sets: ", data_sets)
             this.activeData = { 
-                
+                title: "Votes Gain or Loss",
                 type: "line",
                 data: {
                     labels:this.dateheaders_store[this.selectedindex],
@@ -477,13 +482,13 @@ export default {
                 },
                 options: {
                     responsive: true,
-                    lineTension: 1,
+                    //lineTension: 1,
                     scales: {
                             yAxis:{}
                         }
                 }
             }
-            if(this.selectedindex == 1)
+            if(this.selectedindex == 0)
                 this.open();
         },
         perlinechart(){
@@ -513,7 +518,7 @@ export default {
            
             //console.log("Data Sets: ", data_sets)
             this.activeData = { 
-                
+                title: "Percentage of Remaining Votes",
                 type: "line",
                 data: {
                     labels:this.dateheaders_store[this.selectedindex],
@@ -521,13 +526,13 @@ export default {
                 },
                 options: {
                     responsive: true,
-                    lineTension: 1,
+                    //lineTension: 1,
                     scales: {
                             yAxis:{}
                         }
                 }
             }
-            if(this.selectedindex == 1)
+            if(this.selectedindex == 0)
                 this.open();
         },
 
@@ -562,7 +567,7 @@ export default {
            
             console.log("Data Sets: ", data_sets)
             this.activeData = { 
-                
+                title: "Total Votes Pie",
                 type: "pie",
                 
                 data: {
@@ -571,7 +576,7 @@ export default {
                 },
                 options: {
                     responsive: true,
-                    lineTension: 1,
+                    //lineTension: 1,
                     hoverBorderWidth: 2,
                     scales: {
                         x: {
@@ -602,7 +607,7 @@ export default {
                         }    
                 }
             }
-            if(this.selectedindex == 1)
+            if(this.selectedindex == 0)
                 this.open();
         },
 
@@ -664,7 +669,7 @@ export default {
            
             console.log("Data Sets: ", data_sets)
             this.activeData = { 
-                
+                title: "Stacked Total Votes",
                 type: "bar",
                 
                 data: {
@@ -673,7 +678,7 @@ export default {
                 },
                 options: {
                     responsive: true,
-                    lineTension: 1,
+                    //lineTension: 1,
                     hoverBorderWidth: 2,
                     title: {
                             display: true,
@@ -714,7 +719,7 @@ export default {
                         }    
                 }
             }
-            if(this.selectedindex == 1)
+            if(this.selectedindex == 0)
                 this.open();
         },
 
@@ -776,7 +781,7 @@ export default {
            
             console.log("Data Sets: ", data_sets)
             this.activeData = { 
-                
+                title: "Total Votes Bars",
                 type: "bar",
                 
                 data: {
@@ -785,7 +790,7 @@ export default {
                 },
                 options: {
                     responsive: true,
-                    lineTension: 1,
+                    //lineTension: 1,
                     hoverBorderWidth: 2,
                     title: {
                             display: true,
@@ -824,7 +829,7 @@ export default {
                         }    
                 }
             }
-            if(this.selectedindex == 1)
+            if(this.selectedindex == 0)
                 this.open();
         },
 
@@ -837,7 +842,7 @@ export default {
        },
        open(){
             window.scrollBy(0,500)
-            this.selectedindex = 1
+            this.selectedindex = 0
             $('#dyn_component').animate({marginTop:this.mTop,opacity:'0.8'},{duration:"fast"}, {easing:"easein"})
             .css('font-size',this.fSize).css('transform','scale('+this.zoomC+')');
             this.zoomC = '1.0',
@@ -853,13 +858,13 @@ export default {
             this.mTop = '-15em'
            
             $('#dyn_component').animate({marginTop:'0em',opacity:'0'},{duration:"fast"}, {easing:"easein"});
-            this.selectedindex = 1;
+            this.selectedindex = 0;
            
 
        },    
        handleUpdatePageTop(pageNum){
             //console.log("goes up to parent")
-            this.selectedindex = pageNum
+            this.selectedindex = pageNum-1
 
        }, 
        parse_data() {

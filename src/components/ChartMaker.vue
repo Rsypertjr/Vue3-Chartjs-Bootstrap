@@ -1,5 +1,7 @@
 <template>
   <div>
+    <h1 class="mb-2">{{ activeData.title }}</h1>
+    <hr/>
     <canvas id="chart"></canvas>     
     <ChartPager :rows="rows" :isClosed="isClosed" :type="type" @update-page="handleUpdatePage"/>  
   </div>
