@@ -87,7 +87,7 @@
     </div>
 </template>
 
-<script>
+<script type="text/javascript">
  /* eslint-disable */   
 import $ from "jquery";
 import 'datatables.net-dt';
