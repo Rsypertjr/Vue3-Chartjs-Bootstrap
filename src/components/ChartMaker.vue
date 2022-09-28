@@ -1,8 +1,11 @@
 <template>
-  <div>
+  <div class="container-fluid">
     <h1 class="mb-2">{{ activeData.title }}</h1>
     <hr/>
     <ResolutionSelect @select-resolution="handleResolution"/>
+    <h1 class="mb-2" v-if="activeData.type == 'pie'">
+        Date: {{ activeData.pie_headers[dateIdx] }}
+    </h1>
     <canvas id="chart"></canvas>     
     <ChartPager :rows="rows" :isClosed="isClosed" :type="type" :resolution="resolution" @update-page="handleUpdatePage"/>  
   </div>
@@ -36,12 +39,13 @@
 },    
      
       setup(props,context){
-        let pNum = ref(0)
+        let pNum = ref(1)
         const idx = ref(props.selectedindex)
         const acData = ref(props.activeData)
         const acDataStore = ref({})
         const resolution = ref("1");
-        let type = ref('')
+        let type = ref('');
+        let dateIdx = ref(0);
 
         /*
 
@@ -62,35 +66,21 @@
           type.value = props.activeData.type
         })
 
-        onMounted(() => {     
-              
+        onMounted(() => {                   
              
               console.log("Active Data in Mounted",props.activeData)
-              //console.log("selected index",props.selectedindex)
-             // console.log("the Chart in Mounted", theChart)
-                //if(props.activeData.type == 'bar')
-                  // Chart.defaults.font.size = 25;
-                let ctx = document.getElementById('chart')
-                theChart = new Chart(ctx, props.activeData)
-              
-             
+              let ctx = document.getElementById('chart')
+              theChart = new Chart(ctx, props.activeData)
         })
 
         onUnmounted(() => {
           console.log("Component is unmounting....")
-          //console.log("Chart in Unmount",theChart)
           theChart.destroy() 
          
         })
 
         onUpdated(() => {   
 
-        
-            //console.log("OnUpdated")   
-            //console.log("Props in Updated: ", props.activeData)
-            //console.log("theChart in Updated: ",theChart)
-            //theChart.data.labels = '';
-            //theChart.type = '';
             theChart.data.datasets.forEach((dataset) => {
                 dataset.data = {};
             });
@@ -109,31 +99,20 @@
        
 
         watchEffect(() => {
-          //console.log("page no from pager", pNum.value)
-         
-         
-         
-
+           if(props.activeData.type == "pie") {
+              let plen = props.activeData.pie_headers.length;
+              console.log("Page Length: ",plen)
+              dateIdx.value = pNum.value % plen;
+              if(dateIdx.value == 0)
+                dateIdx.value = plen-1;
+              }
+              
         });
-
-        function updateData(sindex,paData){
-          let pdata = {}
-          pdata.type = paData.type
-              pdata.options = paData.options
-              pdata.data = paData.data
-              pdata.data.labels = paData.data.labels[sindex]
-              paData.data.datasets.forEach((dataset,index) => {
-                  pdata.data.datasets[index] = dataset
-                  pdata.data.datasets[index].data = dataset.data[sindex];
-              })
-            return pdata
-            
-        }
          
         // methods
         function handleUpdatePage(pageNo){
             pNum.value = pageNo
-            //console.log("page no: ", pNum.value)
+            console.log("page no: ", pNum.value)
             context.emit("updatePageTop",pageNo)
             idx.value = props.selectedindex
             //console.log("Props Data", props.activeData)
@@ -148,13 +127,14 @@
         return {
             handleUpdatePage,
             handleResolution,
-            updateData,
             idx,
             pdata,
             acData,
             acDataStore,
             type,
-            resolution
+            resolution,
+            pNum,
+            dateIdx
           }
 
       },

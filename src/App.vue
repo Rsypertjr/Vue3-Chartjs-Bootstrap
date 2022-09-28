@@ -196,6 +196,7 @@ export default {
       selectedindex: function(val){
             console.log("Selected Index changed: ", val);    
             this.parse_vote();
+
             if(!this.isClosed){
                 switch(this.chartType){ 
                     case 'VotesTable':
@@ -552,9 +553,10 @@ export default {
             
             console.log("Entering Total Votes Pie Chart.....")
             console.log("Trump Slices", this.trump_slices)
-           
+            let pie_headers = this.dateheaders_store[this.selectedindex];
             let data_sets = [];
             let obj = {
+               
                 data: [this.trump_slices[this.selectedindex], this.biden_slices[this.selectedindex],this.other_slices[this.selectedindex]],
                 label: "Total Votes",
                 backgroundColor: [
@@ -573,6 +575,7 @@ export default {
             console.log("Data Sets: ", data_sets)
             this.activeData = { 
                 title: "Total Votes Pie",
+                pie_headers: pie_headers,
                 type: "pie",
                 
                 data: {

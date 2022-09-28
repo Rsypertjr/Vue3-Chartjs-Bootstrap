@@ -97,26 +97,24 @@
             }
 
             function next(){
-               
-                if(currentPage.value < pages.value.length){ 
-                    currentPage.value++
-                                     
-                    
-                    if(currentPage.value <= pages.value.length) {
-                        let chk = (currentPage.value-1) % 10 == 0;
-                        console.log("Check: ",chk);
-                        if(chk){
-                            pageArrayIndex.value += 10  
-                            //currentPage.value++                   
-                        }    
-                        context.emit("updatePage",currentPage.value);         
-                    }     
-                    else
-                        currentPage.value--; 
-                         
+                currentPage.value++ 
+                if(currentPage.value <= pages.value.length){ 
+                                                        
+              
+                    let chk = (currentPage.value-1) % 10 == 0;
+                    console.log("Check: ",chk);
+                    if(chk){
+                        pageArrayIndex.value += 10  
+                        //currentPage.value++                   
+                    }    
+                    context.emit("updatePage",currentPage.value);         
+                  
+                        
                 }
                 else if(currentPage.value > pages.value.length) {
-                   console.log("end condition...")
+                   currentPage.value = pages.value.length;                          
+                   console.log("end condition...");
+                   context.emit("updatePage",currentPage.value);    
                    //currentPage.value = pages.value.length - 1;
                 }
                 
@@ -161,6 +159,8 @@
 
                     if(props.rows.length < 10)
                         pageSize.value = props.rows.length;
+
+                    console.log("Number of Pages: ",pages.value.length);
                     
                     hlitePage(currentPage.value)
             });
