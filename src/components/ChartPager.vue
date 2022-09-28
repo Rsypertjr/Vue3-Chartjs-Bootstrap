@@ -29,7 +29,9 @@
             let currentPage = ref(1);
             let pageArrayIndex = ref(0);
             let showPager = ref(true);
-            let isPie = ref(true);
+            let isPie = ref(true);  
+
+           
 
             onMounted(() => {
                 console.log("type in Pager: ", props.type)
@@ -136,7 +138,6 @@
                         pageArrayIndex.value = 0;
                         currentPage.value = 1;
                     }
-                        
                     
                     hlitePage(currentPage.value)
             });

@@ -2,6 +2,7 @@
   <div>
     <h1 class="mb-2">{{ activeData.title }}</h1>
     <hr/>
+    <ResolutionSelect @select-resolution="handleResolution"/>
     <canvas id="chart"></canvas>     
     <ChartPager :rows="rows" :isClosed="isClosed" :type="type" @update-page="handleUpdatePage"/>  
   </div>
@@ -14,6 +15,8 @@
   Chart.register(...registerables);
   import { onMounted, onUpdated, onUnmounted, onBeforeMount,  ref, watchEffect, watch  } from 'vue'
   import ChartPager from './ChartPager.vue'
+  import ResolutionSelect from './ResolutionSelect.vue';
+
   var ctx = null
   var theChart = null
   var theChart2 = null
@@ -28,8 +31,9 @@
         theChart: Object
       }, 
       components:{
-        ChartPager
-      },    
+    ChartPager,
+    ResolutionSelect
+},    
      
       setup(props,context){
         let pNum = ref(0)
@@ -132,13 +136,15 @@
             context.emit("updatePageTop",pageNo)
             idx.value = props.selectedindex
             //console.log("Props Data", props.activeData)
-           
+          }
 
-           
+          function handleResolution(res){
+            context.emit("sendResolution",res);
           }
 
         return {
             handleUpdatePage,
+            handleResolution,
             updateData,
             idx,
             pdata,

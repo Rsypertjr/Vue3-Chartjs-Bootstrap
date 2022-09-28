@@ -78,7 +78,7 @@
                 <div v-if="isClosed == true" class="loader"></div> 
                 <div v-else class="row d-flex justify-content-center">                    
                     <component  :is="activeComponent" :activeData="activeData" :rows="vote_rows" 
-                    :isClosed="isClosed" :selectedindex="selectedindex" @update-page-top="handleUpdatePageTop"></component> 
+                    :isClosed="isClosed" :selectedindex="selectedindex" @update-page-top="handleUpdatePageTop" @send-resolution="handleResolution"></component> 
                 </div>  
                        
             </div>
@@ -166,6 +166,7 @@ export default {
             perremainingtrump_store: [],
             perremainingbiden_store:[],
             parse_interval: 10,
+            resolution: 1,
             pie_headers: [],
             the_pieheader:null,
             the_stackedheader:null,
@@ -243,6 +244,8 @@ export default {
             
             this.isClosed = false
             this.selectedindex = 0;
+            this.resolution = 1;  
+            this.parse_vote();          
             switch(this.chartType){ 
                 case 'VotesTable':
                     this.votestable();
@@ -618,24 +621,10 @@ export default {
             this.chartType = "StackedBarChart"
             this.activeData = {}
             this.zoomC = '0.8'
-           // this.mTop = '-31em'
-            //this.fSize = '1.5em'
             this.isClosed = false
             console.log("Entering Total Votes Stacked Bar Chart.....")
             console.log("Date Data Trump", this.datedatatrump_store)
-            /*
-            window.chartColors = {
-                red: 'rgb(255, 99, 132)',
-                orange: 'rgb(255, 159, 64)',
-                yellow: 'rgb(255, 205, 86)',
-                green: 'rgb(75, 192, 192)',
-                blue: 'rgb(54, 162, 235)',
-                purple: 'rgb(153, 102, 255)',
-                grey: 'rgb(231,233,237)'
-                };
-                */
-
-            
+                    
             let data_sets = [];
             let obj = {
                 data: Object.values(this.datedatatrump_store[this.selectedindex]),
@@ -730,24 +719,10 @@ export default {
             this.chartType = "VotesBarChart"
             this.activeData = {}
             this.zoomC = '0.8'
-           // this.mTop = '-31em'
-            //this.fSize = '1.5em'
             this.isClosed = false
             console.log("Entering Total Votes Stacked Bar Chart.....")
             console.log("Date Data Trump", this.datedatatrump_store)
-            /*
-            window.chartColors = {
-                red: 'rgb(255, 99, 132)',
-                orange: 'rgb(255, 159, 64)',
-                yellow: 'rgb(255, 205, 86)',
-                green: 'rgb(75, 192, 192)',
-                blue: 'rgb(54, 162, 235)',
-                purple: 'rgb(153, 102, 255)',
-                grey: 'rgb(231,233,237)'
-                };
-                */
-
-            
+                      
             let data_sets = [];
             let obj = {
                 data: Object.values(this.datedatatrump_store[this.selectedindex]),
@@ -859,6 +834,8 @@ export default {
            
             $('#dyn_component').animate({marginTop:'0em',opacity:'0'},{duration:"fast"}, {easing:"easein"});
             this.selectedindex = 0;
+            this.resolution = 1;
+            this.parse_vote();
            
 
        },    
@@ -867,10 +844,50 @@ export default {
             this.selectedindex = pageNum-1
 
        }, 
+
+       handleResolution(res){
+
+        
+           
+            //this.isClosed = true
+            console.log("Resolution",res);
+            this.resolution = parseInt(res);
+            this.parse_vote()
+            if(!this.isClosed){
+                switch(this.chartType){ 
+                    case 'VotesTable':
+                        this.votestable();
+                        break;             
+                    case 'VotesLineChart':
+                        this.voteslinechart();
+                        break;
+                    case 'VotesSpikesChart':
+                        this.votesspikeschart();
+                        break;   
+                    case 'VotesGainLoss':
+                        this.votesgainloss();
+                        break; 
+                    case 'PerLineChart':
+                        this.perlinechart();
+                        break;  
+                    case 'TotalVotesPieChart':
+                        this.totalvotespiechart();
+                        break;  
+                    case 'StackedBarChart':
+                        this.stackedbarchart();
+                        break;  
+                    case 'VotesBarChart':
+                        this.votesbarchart();
+                        break;                  
+                    default:
+                        break;
+                    }
+            }
+        
+          
+
+       },
        parse_data() {
-            //console.log("Selected Sort:",selected_sort)
-            //console.log("Race Data:", this.race_info);
-           // console.log("Timeseries: ",this.timeseries);
 
             // Parse Votes for Master Table
             function calc_votes(votes,index){
@@ -910,8 +927,6 @@ export default {
                     votes.total_vote_add_trump = votes.votes * votes.trumpd;
                     votes.total_vote_add_biden = votes.votes * votes.bidenj;
                     votes.total_vote_add_other = votes.votes - (votes.votes * votes.trumpd + votes.votes * votes.bidenj);
-                    //votes.total_vote_add_bdiff = votes.votes * votes.bidenj - votes.votes * votes.trumpd;
-                    //votes.total_vote_add_tdiff = votes.votes * votes.trumpd - votes.votes * votes.bidenj;
                     votes.other_votes = (1-votes.bidenj-votes.trumpd)*votes.votes;
                 }
                 else if(index > 0){    
@@ -923,56 +938,32 @@ export default {
 
                     if(votes.bidenj == 0)
                         votes.biden_votes = 0;
-                        //votes.biden_votes = pres_votes[index-1].biden_votes + votes.total_vote_add*votes.bidenj;
-                        votes.biden_votes = votes.bidenj*votes.votes;
+
+                    votes.biden_votes = votes.bidenj*votes.votes;
                     
                     if(votes.trumpd == 0)
                         votes.trump_votes = 0;
                     else  
-                    //votes.trump_votes = pres_votes[index-1].trump_votes + votes.total_vote_add*votes.trumpd;
-                    votes.trump_votes = votes.trumpd*votes.votes;
+                        votes.other_votes = votes.votes - votes.biden_votes - votes.trump_votes;
 
-                    votes.other_votes = votes.votes - votes.biden_votes - votes.trump_votes;
-
-                    //votes.total_vote_add_trump = (pres_votes[index].votes - pres_votes[index-1].votes) * votes.trumpd;
+                 
                     votes.total_vote_add_trump = votes.votes*votes.trumpd - pres_votes[index-1].votes*pres_votes[index-1].trumpd;
-                    //votes.total_vote_add_biden = (pres_votes[index].votes - pres_votes[index-1].votes) * votes.bidenj;
                     votes.total_vote_add_biden = votes.votes*votes.bidenj - pres_votes[index-1].votes*pres_votes[index-1].bidenj;
                     votes.total_vote_add_other = (1-votes.bidenj-votes.trumpd)*votes.votes - pres_votes[index-1].votes*(1 - pres_votes[index-1].bidenj - pres_votes[index-1].trumpd);
                     votes.total_vote_add_total = pres_votes[index].votes - pres_votes[index-1].votes;
-                    // votes.total_vote_add_bdiff = (votes.votes*votes.bidenj - pres_votes[index-1].votes*pres_votes[index-1].bidenj) - (votes.votes*votes.trumpd - pres_votes[index-1].votes*pres_votes[index-1].trumpd);
-                    // votes.total_vote_add_tdiff = (votes.votes*votes.trumpd - pres_votes[index-1].votes*pres_votes[index-1].trumpd) - (votes.votes*votes.bidenj - pres_votes[index-1].votes*pres_votes[index-1].bidenj);
                 }
                 return votes;
               });
               //console.log("Total Votes:",pres_votes);
         
             let totalnum_votes = pres_votes[pres_votes.length-1].votes;
-            //console.log("Total Num of Votes: ",totalnum_votes);
             let temp_rows = [];
-            //if(selected_sort && selected_sort.includes('Time')) {
-            //  console.log("Sort Selected: ",selected_sort);
-                temp_rows = pres_votes.map(function(vote){                            
-                    //return {"votes":vote.votes,"timestamp":vote.timestamp,"bidenj":vote.bidenj,"trumpd":vote.trumpd};
+                temp_rows = pres_votes.map(function(vote){        
                     vote.percent_of_remaining_trump = vote.total_vote_add_trump*100/(totalnum_votes-vote.votes);
                     vote.percent_of_remaining_biden = vote.total_vote_add_biden*100/(totalnum_votes-vote.votes);
                     return vote;
                 });
-            // }
-            /*
-            if(selected_sort && selected_sort.includes('Vote')) {
-                console.log("Sort Selected: ",selected_sort);
-                temp_rows = pres_votes.map(function(vote){                            
-                    //return {"votes":vote.votes,"timestamp":vote.timestamp,"bidenj":vote.bidenj,"trumpd":vote.trumpd};
-                    vote.percent_of_remaining_trump = vote.total_vote_add_trump*100/(totalnum_votes-vote.votes);
-                    vote.percent_of_remaining_biden = vote.total_vote_add_biden*100/(totalnum_votes-vote.votes);
-                    return vote;
-                }).sort(function(a, b){return a.votes - b.votes}); 
-              }
-
-              */
-              //console.log("Total Votes Again:",temp_rows);
-              
+         
               this.vote_rows = temp_rows.map(function(vote,index){
                   return {
                     index:index,
@@ -990,66 +981,14 @@ export default {
                     remaining_percent_biden:vote.percent_of_remaining_biden
                     };
                 });
-                //console.log("Vote Rows:", this.vote_rows);
-                // $('#results_table').show();
-                //  if(this2.table)
-                //  this2.table.destroy();
-                /* 
-                $('table.display').css('display','block');
-            
-                //var this3 = this2;
-                seTimeout(function(){ 
-                    $('#results_table').show();
-                    $('.loader').hide();
-                    this.table = $("table.display").DataTable();
-
-                    $("table.display").on( 'page.dt', function () {
-                        var info = this.table.page.info();
-                        $('#pageInfo').html( 'Showing page: '+info.page+' of '+info.pages );
-                        this.selectedindex = info.page;
-                        this.number_pages = info.pages;
-                        this.linechart();
-                        this.linechart2();
-                        this.linechart3();
-                        this.linechart4();
-                        this.piechart();
-                        this.stackedchart();
-                        this.fill_votebins();
-                        this.stackedchart2();
-                    } );
-                    var info = this.table.page.info();
-                    this.number_pages = info.pages; 
-                    //this.step = 200000/this.number_pages;
-                    //console.log("Step:",this.step);
-
-                    console.log("Pages:", this.number_pages);
-
-                    this.parse_vote();
-                    this.linechart();
-                    this.linechart2();
-                    this.linechart3();
-                    this.linechart4();
-                    this.piechart();
-                    this.fill_votebins();
-                    this.stackedchart2();
-                    this.stackedchart();                                   
-                
-                }, 500);
-                */
+             
                 this.fill_votebins();
     
       },
       start_tables: function(state,sort){
           
-          $('.loader').show();
-        //  this.parse_data(sort);  
-
-        
-          
-          
-          $('#pieheader').css('display','block');
-          
-          
+          $('.loader').show();          
+          $('#pieheader').css('display','block');    
       },
       parse_vote(){
             // Derive Headers and Data for Line Chart
@@ -1082,8 +1021,12 @@ export default {
               this.perremainingtrump_store = [];
               this.perremainingbiden_store = [];
 
+              if(this.vote_rows.length < this.parse_interval){
+                this.parse_interval = this.vote_rows.length-1;
+                this.resolution = 1;
+              }
 
-              //console.log("Parse Interval",this.parse_interval);
+              console.log("Parse Interval",this.parse_interval);
               for(i=0;i<this.vote_rows.length;i++){
                   if(i == 0){
                       dateheaders.push(this.vote_rows[i].timestamp);
@@ -1103,7 +1046,7 @@ export default {
                       
                       
                   }
-                  else if( i % this.parse_interval != 0 ){
+                  else if( i % (this.parse_interval*this.resolution) != 0 ){
                       dateheaders.push(this.vote_rows[i].timestamp);
                       datedatabiden.push(this.vote_rows[i].biden_votes);
                       datedatatrump.push(this.vote_rows[i].trump_votes);
@@ -1118,7 +1061,7 @@ export default {
                       perremainingtrump.push(this.vote_rows[i].remaining_percent_trump);
                       perremainingbiden.push(this.vote_rows[i].remaining_percent_biden);
                   }
-                  else if(i % this.parse_interval == 0) {
+                  else if(i % (this.parse_interval*this.resolution) == 0) {
                       dateheaders.push(this.vote_rows[i].timestamp);
                       datedatabiden.push(this.vote_rows[i].biden_votes);
                       datedatatrump.push(this.vote_rows[i].trump_votes);
@@ -1179,9 +1122,9 @@ export default {
 
               }
           
-              //console.log("Date Total Add: ", this.datedatatotaladd_store);
-              //console.log("Date Biden Add Diff: ", this.datedatabidenadddiff_store);
-              //console.log("Date Trump Add Diff: ", this.datedatatrumpadddiff_store);
+              console.log("Date Total Add: ", this.datedatatotaladd_store);
+              console.log("Date Biden Add Diff: ", this.datedatabidenadddiff_store);
+              console.log("Date Trump Add Diff: ", this.datedatatrumpadddiff_store);
 
               // PieChart calculations
               var totalslices = [];
@@ -1306,12 +1249,12 @@ export default {
                       this.bin_trump[index].push(this.vote_bins[i].trump_in_bin);
                       
                   }
-                  else if( i % this.parse_interval != 0 ){
+                  else if( i % this.parse_interval*this.resolution != 0 ){
                       this.bin_headers[index].push(this.vote_bins[i].interval);
                       this.bin_biden[index].push(this.vote_bins[i].biden_in_bin);
                       this.bin_trump[index].push(this.vote_bins[i].trump_in_bin);
                   }
-                  else if(i % this.parse_interval == 0) {
+                  else if(i % this.parse_interval*this.resolution == 0) {
                       this.bin_headers[index].push(this.vote_bins[i].interval);
                       this.bin_biden[index].push(this.vote_bins[i].biden_in_bin);
                       this.bin_trump[index].push(this.vote_bins[i].trump_in_bin);
