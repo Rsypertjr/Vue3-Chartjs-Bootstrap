@@ -3,8 +3,8 @@
             <div class="d-flex justify-content-center">
                 <button type="button" @click="previous" class="btn btn-light pager-btn">Previous</button>   
                 <div  v-for="pg in pageArray.keys()"  :key="pg"  class="pager-btn"  >
-                    <button  v-if="((pg + 1) + pageIndex) <= pages.length" :id="'page-'+(pg+1+pageIndex)" class='btn btn-light' @click="showPage((pg + 1) + pageIndex)">
-                        {{ (pg + 1) + pageIndex }}
+                    <button v-if="((pg + pageIndex) <= pages.length)" :id="'page-'+(pg+pageIndex)" class='btn btn-light' @click="showPage(pg + pageIndex)">
+                         {{ pg  + pageIndex }}
                     </button>
                 </div>
                 <button type="button" @click="next" class="btn btn-light pager-btn">Next</button>
@@ -21,13 +21,15 @@
         props: {
             rows: Array,
             isClosed: Boolean,
-            type: String
+            type: String,
+            resolution: String
+
         },
 
         setup(props,context){
             let pageSize = ref(10);
             let currentPage = ref(1);
-            let pageArrayIndex = ref(0);
+            let pageArrayIndex = ref(1);
             let showPager = ref(true);
             let isPie = ref(true);  
 
@@ -37,7 +39,7 @@
                 console.log("type in Pager: ", props.type)
                 hlitePage(1)
                 currentPage.value = 1
-                pageArrayIndex.value = 0
+                pageArrayIndex.value = 1
                 isPie.value = props.type == 'pie'
             })
 
@@ -48,14 +50,16 @@
             })
            
 
-            console.log("Prop rows: ",props.rows);
+           
             const pages = computed(() => {
                 let page_s = [];
                 let idx = 0;
-              
-                for(let i = 0;i < props.rows.length;i += pageSize.value){
+                
+                
+
+                for(let i = 0;i < props.rows.length;i += pageSize.value*parseInt(props.resolution)){
                     let sl = pageSize.value;
-                    if((props.rows.length - i) < 10)
+                    if((props.rows.length - i) < pageSize.value)
                         sl = props.rows.length - i
                     page_s[idx] = props.rows.slice(i,i+sl);
                     page_s[idx] = page_s[idx].filter((p) => p.index != 'undefined')
@@ -80,8 +84,16 @@
              
             //methods
             function showPage(num){
-                currentPage.value = num;
-                context.emit("updatePage",currentPage.value) 
+                if( typeof(props.rows[parseInt(num)]) != "undefined" ){
+                    currentPage.value = num;
+                    context.emit("updatePage",currentPage.value) 
+                }
+                else{
+                    currentPage.value = 1;
+                    context.emit("updatePage",currentPage.value); 
+                }
+                   
+                
             }
 
             function next(){
@@ -89,13 +101,19 @@
                 if(currentPage.value < pages.value.length){ 
                     currentPage.value++
                                      
-                    let chk = (currentPage.value-1) % 10 == 0;
-                    console.log("Check: ",chk)
-                    if(chk){
-                        pageArrayIndex.value += 10  
-                        //currentPage.value++                   
-                    }            
-                    context.emit("updatePage",currentPage.value)         
+                    
+                    if(currentPage.value <= pages.value.length) {
+                        let chk = (currentPage.value-1) % 10 == 0;
+                        console.log("Check: ",chk);
+                        if(chk){
+                            pageArrayIndex.value += 10  
+                            //currentPage.value++                   
+                        }    
+                        context.emit("updatePage",currentPage.value);         
+                    }     
+                    else
+                        currentPage.value--; 
+                         
                 }
                 else if(currentPage.value > pages.value.length) {
                    console.log("end condition...")
@@ -111,12 +129,14 @@
                     let chk = currentPage.value % 10 == 0;
                     console.log("Check: ",chk)
                     if(chk){
-                        pageArrayIndex.value -= 10                        
+                        pageArrayIndex.value -= 10   
+                        if(pageArrayIndex.value <= 0)   
+                            pageArrayIndex.value = 1;                  
                     }
                     context.emit("updatePage",currentPage.value)
                 }
                 else{
-                    pageArrayIndex.value = 0;
+                    pageArrayIndex.value = 1;
                     currentPage.value = 1;
                 }
                 
@@ -132,12 +152,15 @@
                     if(typeof(pages.value[currentPage.value-1]) == "undefined"){
                         console.log("correcting...")
                         currentPage.value = 1;
-                        pageArrayIndex.value = 0;
+                        pageArrayIndex.value = 1;
                     }
                     if(props.isClosed == true){
-                        pageArrayIndex.value = 0;
+                        pageArrayIndex.value = 1;
                         currentPage.value = 1;
                     }
+
+                    if(props.rows.length < 10)
+                        pageSize.value = props.rows.length;
                     
                     hlitePage(currentPage.value)
             });

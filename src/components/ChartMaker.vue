@@ -4,7 +4,7 @@
     <hr/>
     <ResolutionSelect @select-resolution="handleResolution"/>
     <canvas id="chart"></canvas>     
-    <ChartPager :rows="rows" :isClosed="isClosed" :type="type" @update-page="handleUpdatePage"/>  
+    <ChartPager :rows="rows" :isClosed="isClosed" :type="type" :resolution="resolution" @update-page="handleUpdatePage"/>  
   </div>
 </template>
 
@@ -40,6 +40,7 @@
         const idx = ref(props.selectedindex)
         const acData = ref(props.activeData)
         const acDataStore = ref({})
+        const resolution = ref("1");
         let type = ref('')
 
         /*
@@ -139,7 +140,9 @@
           }
 
           function handleResolution(res){
+            resolution.value = res;
             context.emit("sendResolution",res);
+
           }
 
         return {
@@ -150,7 +153,8 @@
             pdata,
             acData,
             acDataStore,
-            type
+            type,
+            resolution
           }
 
       },

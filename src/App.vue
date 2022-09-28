@@ -167,6 +167,7 @@ export default {
             perremainingbiden_store:[],
             parse_interval: 10,
             resolution: 1,
+            resolution_available: true,
             pie_headers: [],
             the_pieheader:null,
             the_stackedheader:null,
@@ -193,7 +194,8 @@ export default {
   watch:{
     
       selectedindex: function(val){
-          console.log("Selected Index changed: ", val)  
+            console.log("Selected Index changed: ", val);    
+            this.parse_vote();
             if(!this.isClosed){
                 switch(this.chartType){ 
                     case 'VotesTable':
@@ -623,7 +625,7 @@ export default {
             this.zoomC = '0.8'
             this.isClosed = false
             console.log("Entering Total Votes Stacked Bar Chart.....")
-            console.log("Date Data Trump", this.datedatatrump_store)
+            //console.log("Date Data Trump", this.datedatatrump_store)
                     
             let data_sets = [];
             let obj = {
@@ -841,51 +843,51 @@ export default {
        },    
        handleUpdatePageTop(pageNum){
             //console.log("goes up to parent")
-            this.selectedindex = pageNum-1
+            this.selectedindex = pageNum-1;
 
        }, 
 
        handleResolution(res){
-
-        
-           
-            //this.isClosed = true
-            console.log("Resolution",res);
+            this.activeComponent = "";
+            this.selectedindex = 0;
             this.resolution = parseInt(res);
-            this.parse_vote()
-            if(!this.isClosed){
-                switch(this.chartType){ 
-                    case 'VotesTable':
-                        this.votestable();
-                        break;             
-                    case 'VotesLineChart':
-                        this.voteslinechart();
-                        break;
-                    case 'VotesSpikesChart':
-                        this.votesspikeschart();
-                        break;   
-                    case 'VotesGainLoss':
-                        this.votesgainloss();
-                        break; 
-                    case 'PerLineChart':
-                        this.perlinechart();
-                        break;  
-                    case 'TotalVotesPieChart':
-                        this.totalvotespiechart();
-                        break;  
-                    case 'StackedBarChart':
-                        this.stackedbarchart();
-                        break;  
-                    case 'VotesBarChart':
-                        this.votesbarchart();
-                        break;                  
-                    default:
-                        break;
+            this.parse_vote();
+            if(this.resolution_available){
+                //this.isClosed = true   
+                
+                if(!this.isClosed){
+                    switch(this.chartType){ 
+                        case 'VotesTable':
+                            this.votestable();
+                            break;             
+                        case 'VotesLineChart':
+                            this.voteslinechart();
+                            break;
+                        case 'VotesSpikesChart':
+                            this.votesspikeschart();
+                            break;   
+                        case 'VotesGainLoss':
+                            this.votesgainloss();
+                            break; 
+                        case 'PerLineChart':
+                            this.perlinechart();
+                            break;  
+                        case 'TotalVotesPieChart':
+                            this.totalvotespiechart();
+                            break;  
+                        case 'StackedBarChart':
+                            this.stackedbarchart();
+                            break;  
+                        case 'VotesBarChart':
+                            this.votesbarchart();
+                            break;                  
+                        default:
+                            break;
+                        }
                     }
-            }
-        
-          
 
+                }
+               
        },
        parse_data() {
 
@@ -935,11 +937,11 @@ export default {
                     else 
                         votes.total_vote_add = pres_votes[index].votes - pres_votes[index-1].votes;
 
+                    votes.biden_votes = votes.bidenj*votes.votes;
+                    votes.trump_votes = votes.trumpd*votes.votes;
 
                     if(votes.bidenj == 0)
                         votes.biden_votes = 0;
-
-                    votes.biden_votes = votes.bidenj*votes.votes;
                     
                     if(votes.trumpd == 0)
                         votes.trump_votes = 0;
@@ -981,7 +983,10 @@ export default {
                     remaining_percent_biden:vote.percent_of_remaining_biden
                     };
                 });
-             
+                //console.log("Votes Rows: ",this.vote_rows);
+                if(this.vote_rows.length < 10)
+                    this.pageSize = this.vote_rows.length - 1;
+
                 this.fill_votebins();
     
       },
@@ -1076,7 +1081,6 @@ export default {
                       perremainingtrump.push(this.vote_rows[i].remaining_percent_trump);
                       perremainingbiden.push(this.vote_rows[i].remaining_percent_biden);
 
-
                       this.dateheaders_store.push(dateheaders);
                       dateheaders = []; 
                       this.datedatabiden_store.push(datedatabiden);
@@ -1104,6 +1108,7 @@ export default {
                       this.perremainingbiden_store.push(perremainingbiden);
                       perremainingbiden = [];                                          
                   }
+                 
                   else{
                       dateheaders.push(this.vote_rows[i].timestamp);
                       datedatabiden.push(this.vote_rows[i].biden_votes);
@@ -1121,11 +1126,37 @@ export default {
                   }
 
               }
+                this.dateheaders_store.push(dateheaders);
+                dateheaders = []; 
+                this.datedatabiden_store.push(datedatabiden);
+                datedatabiden = [];
+                this.datedatabidenadd_store.push(datedatabidenadd);
+                datedatabidenadd = [];
+                this.datedatatrump_store.push(datedatatrump);
+                datedatatrump = [];  
+                this.datedatatrumpadd_store.push(datedatatrumpadd);
+                datedatatrumpadd = [];  
+                this.datedatatotal_store.push(datedatatotal);
+                datedatatotal = []; 
+                this.datedataother_store.push(datedataother);
+                datedataother = [];     
+                this.datedataotheradd_store.push(datedataotheradd);
+                datedataotheradd = [];       
+                this.datedatatotaladd_store.push(datedatatotaladd);
+                datedatatotaladd = [];  
+                this.datedatabidenadddiff_store.push(datedatabidenadddiff);
+                datedatabidenadddiff = [];       
+                this.datedatatrumpadddiff_store.push(datedatatrumpadddiff);
+                datedatatrumpadddiff = [];    
+                this.perremainingtrump_store.push(perremainingtrump);
+                perremainingtrump = [];
+                this.perremainingbiden_store.push(perremainingbiden);
+                perremainingbiden = [];                 
           
               console.log("Date Total Add: ", this.datedatatotaladd_store);
               console.log("Date Biden Add Diff: ", this.datedatabidenadddiff_store);
               console.log("Date Trump Add Diff: ", this.datedatatrumpadddiff_store);
-
+             
               // PieChart calculations
               var totalslices = [];
               var bidenslices = [];
@@ -1164,7 +1195,7 @@ export default {
           this.total_slices = totalslices;
           this.pie_headers = pieheaders;
 
-          //console.log("Other Slices: ",otherslices);
+          console.log("Other Slices: ",otherslices);
 
 
 
@@ -1182,7 +1213,7 @@ export default {
               "trump_in_bin":0,
           };
         
-          this.number_pages = Math.ceil(this.vote_rows.length/this.pageSize)  
+          this.number_pages = Math.ceil(this.vote_rows.length/(this.pageSize*this.resolution))  
           //console.log("Number of Pages: ",this.number_pages)
           let step = parseInt(200000/(this.number_pages*10));
           //let step = 2500;
@@ -1289,6 +1320,10 @@ computed: {
         },
         active_data : function(){
             return this.activeData
+        },
+        res_available : function(){
+            let ra = this.resolution_available;
+            return ra;
         }
         
     }
