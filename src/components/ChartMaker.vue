@@ -1,8 +1,8 @@
 <template>
-  <div class="container-fluid">
+  <div class="container">
     <h1 class="mb-2">{{ activeData.title }}</h1>
     <hr/>
-    <ResolutionSelect @select-resolution="handleResolution"/>
+    <div style="position:relative;transform:scale(1.3)"><ResolutionSelect @select-resolution="handleResolution"/></div>
     <h1 class="mb-2" v-if="activeData.type == 'pie'">
         Date: {{ activeData.pie_headers[dateIdx] }}
     </h1>

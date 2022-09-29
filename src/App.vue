@@ -535,7 +535,7 @@ export default {
                     //lineTension: 1,
                     scales: {
                             yAxis:{}
-                        }
+                        },
                 }
             }
             if(this.selectedindex == 0)
@@ -602,17 +602,20 @@ export default {
                             }
                         },
                     },
-                       
                     plugins: {
-                        legend: {
-                            labels: {
-                                // This more specific font property overrides the global property
-                                font: {
-                                    size: 40
-                                }
+                        tooltip: {
+                            titleFont: {
+                            size: 100
+                            },
+                            bodyFont: {
+                            size: 50
+                            },
+                            footerFont: {
+                            size: 20 // there is no footer by default
                             }
                         }
-                        }    
+                    }   
+               
                 }
             }
             if(this.selectedindex == 0)
